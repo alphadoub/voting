@@ -1,15 +1,20 @@
 package ru.alphadoub.voting.model;
 
-public class Restaurant extends BaseEntity {
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
-    private Integer countOfVotes;
+@Entity
+@Table(name = "restaurants")
+public class Restaurant extends BaseEntity {
+    @Column(name = "count_of_votes", nullable = false)
+    private int countOfVotes = 0;
 
     public Restaurant() {
     }
 
-    public Restaurant(Integer id, String name, Integer countOfVotes) {
+    public Restaurant(Integer id, String name) {
         super(id, name);
-        this.countOfVotes = countOfVotes;
     }
 
     public Integer getCountOfVotes() {
@@ -18,5 +23,14 @@ public class Restaurant extends BaseEntity {
 
     public void setCountOfVotes(Integer countOfVotes) {
         this.countOfVotes = countOfVotes;
+    }
+
+    @Override
+    public String toString() {
+        return "Restaurant{" +
+                "id=" + getId() +
+                "name=" + getName() +
+                "countOfVotes=" + countOfVotes +
+                '}';
     }
 }
