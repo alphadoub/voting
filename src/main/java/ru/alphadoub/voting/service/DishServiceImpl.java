@@ -11,6 +11,8 @@ import ru.alphadoub.voting.repository.RestaurantRepository;
 
 import java.util.List;
 
+import static ru.alphadoub.voting.validation.ValidationUtil.checkNotFound;
+
 @Service
 public class DishServiceImpl implements DishService {
     private final DishRepository dishRepository;
@@ -26,57 +28,35 @@ public class DishServiceImpl implements DishService {
     @Override
     @Transactional
     public Dish create(Dish dish, int restaurantId) {
-        /*
-              * нужна будет проверка (с выбросом кастомного exception, если не будет пройдена),
-              * что ресторан, которому мы хотим добавить блюдо существует
-              */
-
-        Restaurant restaurant = restaurantRepository.getOne(restaurantId); //обернуть в check-метод(реализация позже)
         Assert.notNull(dish, "dish must not be null");
+        Restaurant restaurant = checkNotFound(restaurantRepository.getOne(restaurantId), restaurantId);
         dish.setRestaurant(restaurant);
         return dishRepository.save(dish);
     }
 
     @Override
     public Dish get(int id, int restaurantId) {
-        /*
-              * нужна будет проверка (с выбросом кастомного exception, если не будет пройдена),
-              * что блюдо с переданными id и restaurantId существует
-              */
-        return dishRepository.get(id, restaurantId); //обернуть в check-метод(реализация позже)
+        return checkNotFound(dishRepository.get(id, restaurantId), "id=" + id + "restaurantId=" + restaurantId);
     }
 
     @Override
     @Transactional
     public void update(Dish dish, int restaurantId) {
         Assert.notNull(dish, "dish must not be null");
-
-        /*
-              * нужна будет проверка (с выбросом кастомного exception, если не будет пройдена),
-              * что блюдо, которое мы хотим обновить, существует
-              */
-        get(dish.getId(), restaurantId); //обернуть в check-метод(реализация позже)
+        checkNotFound(dishRepository.get(dish.getId(), restaurantId), "id=" + dish.getId() + "restaurantId=" + restaurantId);
         dish.setRestaurant(restaurantRepository.getOne(restaurantId));
         dishRepository.save(dish);
     }
 
     @Override
     public void delete(int id, int restaurantId) {
-        /*
-              * нужна будет проверка (с выбросом кастомного exception, если не будет пройдена),
-              * что блюдо, которое мы хотим удалить, существует
-              */
-        dishRepository.delete(id, restaurantId);//обернуть в check-метод(реализация позже)
+        checkNotFound(dishRepository.delete(id, restaurantId), "id=" + id + "restaurantId=" + restaurantId );
     }
 
     @Override
     @Transactional
     public List<Dish> getAllByRestaurantId(int restaurantId) {
-        /*
-              * нужна будет проверка (с выбросом кастомного exception, если не будет пройдена),
-              * что ресторан с переданным id существует
-              */
-        restaurantRepository.getOne(restaurantId);//обернуть в check-метод(реализация позже)
+        checkNotFound(restaurantRepository.getOne(restaurantId), restaurantId);
         return dishRepository.getAllByRestaurantId(restaurantId);
     }
 }

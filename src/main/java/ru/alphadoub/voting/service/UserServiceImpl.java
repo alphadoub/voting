@@ -2,9 +2,12 @@ package ru.alphadoub.voting.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import ru.alphadoub.voting.model.User;
 import ru.alphadoub.voting.repository.UserRepository;
+
+import static ru.alphadoub.voting.validation.ValidationUtil.checkNotFound;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -23,30 +26,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User get(int id) {
-        /*
-              * нужна будет проверка (с выбросом кастомного exception, если не будет пройдена),
-              * что пользователь с переданными id существует
-              */
-        return repository.findOne(id);//обернуть в check-метод(реализация позже)
+        return checkNotFound(repository.findOne(id), id);
     }
 
     @Override
+    @Transactional
     public void update(User user) {
         Assert.notNull(user, "user must not be null");
-        /*
-              * нужна будет проверка (с выбросом кастомного exception, если не будет пройдена),
-              * что пользователь, которого мы хотим обновить, существует
-              */
-        get(user.getId()); //обернуть в check-метод(реализация позже)
+        checkNotFound(repository.findOne(user.getId()), user.getId());
         repository.save(user);
     }
 
     @Override
     public void delete(int id) {
-        /*
-              * нужна будет проверка (с выбросом кастомного exception, если не будет пройдена),
-              * что пользователь, которого мы хотим удалить, существует
-              */
-        repository.delete(id);//обернуть в check-метод(реализация позже)
+        checkNotFound(repository.delete(id), id);
     }
 }
