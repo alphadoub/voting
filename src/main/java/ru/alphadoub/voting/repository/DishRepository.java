@@ -13,13 +13,13 @@ public interface DishRepository extends JpaRepository<Dish, Integer> {
     @Override
     Dish save(Dish dish);
 
-    @Override
-    Dish findOne(Integer integer);
+    @Query("SELECT d from Dish d WHERE d.id=?1 AND d.restaurant.id=?2")
+    Dish get(int id, int restaurantId);
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM Dish d WHERE d.id=?1")
-    int delete(int id);
+    @Query("DELETE FROM Dish d WHERE d.id=?1 AND d.restaurant.id=?2")
+    int delete(int id, int restaurantId);
 
     @Query("SELECT d FROM Dish d WHERE d.restaurant.id=?1 ORDER BY d.price ASC")
     List<Dish> getAllByRestaurantId(int restaurantId);
