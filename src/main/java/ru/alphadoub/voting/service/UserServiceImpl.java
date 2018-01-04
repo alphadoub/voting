@@ -7,6 +7,8 @@ import org.springframework.util.Assert;
 import ru.alphadoub.voting.model.User;
 import ru.alphadoub.voting.repository.UserRepository;
 
+import java.util.List;
+
 import static ru.alphadoub.voting.validation.ValidationUtil.checkNotFound;
 
 @Service
@@ -40,5 +42,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public void delete(int id) {
         checkNotFound(repository.delete(id), id);
+    }
+
+    @Override
+    public User getByEmail(String email) {
+        Assert.notNull(email, "email must not be null");
+        return checkNotFound(repository.getByEmail(email), "email=" + email);
+    }
+
+    @Override
+    public List<User> getAll() {
+        return repository.getAll();
     }
 }

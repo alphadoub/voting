@@ -12,7 +12,7 @@ import javax.validation.constraints.Size;
 @Access(AccessType.FIELD)
 public abstract class BaseEntity {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Access(value = AccessType.PROPERTY)
     private Integer id;
 

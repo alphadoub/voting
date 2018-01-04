@@ -22,6 +22,14 @@ public class Dish extends BaseEntity {
     public Dish() {
     }
 
+    public Dish(String name, Integer price) {
+        this(null, name, price);
+    }
+
+    public Dish(Integer id, String name, Integer price) {
+        this(id, name, price, null);
+    }
+
     public Dish(Integer id, String name, Integer price, Restaurant restaurant) {
         super(id, name);
         this.price = price;
@@ -48,8 +56,8 @@ public class Dish extends BaseEntity {
     public String toString() {
         return "Dish{" +
                 "id=" + getId() +
-                "name=" + getName() +
-                "price=" + price +
+                ", name=" + getName() +
+                ", price=" + price +
                 '}';
     }
 }

@@ -29,34 +29,34 @@ public class DishServiceImpl implements DishService {
     @Transactional
     public Dish create(Dish dish, int restaurantId) {
         Assert.notNull(dish, "dish must not be null");
-        Restaurant restaurant = checkNotFound(restaurantRepository.getOne(restaurantId), restaurantId);
+        Restaurant restaurant = checkNotFound(restaurantRepository.findOne(restaurantId), restaurantId);
         dish.setRestaurant(restaurant);
         return dishRepository.save(dish);
     }
 
     @Override
     public Dish get(int id, int restaurantId) {
-        return checkNotFound(dishRepository.get(id, restaurantId), "id=" + id + "restaurantId=" + restaurantId);
+        return checkNotFound(dishRepository.get(id, restaurantId), "id=" + id + " restaurantId=" + restaurantId);
     }
 
     @Override
     @Transactional
     public void update(Dish dish, int restaurantId) {
         Assert.notNull(dish, "dish must not be null");
-        checkNotFound(dishRepository.get(dish.getId(), restaurantId), "id=" + dish.getId() + "restaurantId=" + restaurantId);
+        checkNotFound(dishRepository.get(dish.getId(), restaurantId), "id=" + dish.getId() + " restaurantId=" + restaurantId);
         dish.setRestaurant(restaurantRepository.getOne(restaurantId));
         dishRepository.save(dish);
     }
 
     @Override
     public void delete(int id, int restaurantId) {
-        checkNotFound(dishRepository.delete(id, restaurantId), "id=" + id + "restaurantId=" + restaurantId );
+        checkNotFound(dishRepository.delete(id, restaurantId), "id=" + id + " restaurantId=" + restaurantId );
     }
 
     @Override
     @Transactional
     public List<Dish> getAllByRestaurantId(int restaurantId) {
-        checkNotFound(restaurantRepository.getOne(restaurantId), restaurantId);
+        checkNotFound(restaurantRepository.findOne(restaurantId), restaurantId);
         return dishRepository.getAllByRestaurantId(restaurantId);
     }
 }

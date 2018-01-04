@@ -11,6 +11,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public interface DishRepository extends JpaRepository<Dish, Integer> {
     @Override
+    @Transactional
     Dish save(Dish dish);
 
     @Query("SELECT d from Dish d WHERE d.id=?1 AND d.restaurant.id=?2")

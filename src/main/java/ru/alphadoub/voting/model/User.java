@@ -1,5 +1,6 @@
 package ru.alphadoub.voting.model;
 
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.util.CollectionUtils;
 import ru.alphadoub.voting.ValidationGroups;
@@ -8,10 +9,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -36,17 +34,29 @@ public class User extends BaseEntity {
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role")
     @ElementCollection(fetch = FetchType.EAGER)
+    @BatchSize(size = 200)
     private Set<Role> roles;
 
     public User() {
     }
 
-    public User(Integer id, String name, String email, String password, Restaurant restaurant, Set<Role> roles) {
+    public User(String name, String email, String password) {
+        this(null, name, email, password);
+    }
+
+    public User(Integer id, String name, String email, String password) {
+        this(id, name, email, password, Role.ROLE_USER);
+    }
+
+    public User(Integer id, String name, String email, String password, Role...roles) {
+        this(id, name, email, password, Arrays.asList(roles));
+    }
+
+    public User(Integer id, String name, String email, String password, Collection<Role> roles) {
         super(id, name);
         this.email = email;
         this.password = password;
-        this.restaurant = restaurant;
-        this.roles = roles;
+        setRoles(roles);
     }
 
     public String getEmail() {
@@ -86,8 +96,8 @@ public class User extends BaseEntity {
     public String toString() {
         return "User{" +
                 "id=" + getId() +
-                "name=" + getName() +
-                "email='" + email + '\'' +
+                ", name=" + getName() +
+                ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", roles=" + roles +
                 '}';

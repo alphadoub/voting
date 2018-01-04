@@ -13,6 +13,10 @@ public class Restaurant extends BaseEntity {
     public Restaurant() {
     }
 
+    public Restaurant(String name) {
+        this(null, name);
+    }
+
     public Restaurant(Integer id, String name) {
         super(id, name);
     }
@@ -29,8 +33,8 @@ public class Restaurant extends BaseEntity {
     public String toString() {
         return "Restaurant{" +
                 "id=" + getId() +
-                "name=" + getName() +
-                "countOfVotes=" + countOfVotes +
+                ", name=" + getName() +
+                ", countOfVotes=" + countOfVotes +
                 '}';
     }
 }

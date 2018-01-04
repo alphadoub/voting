@@ -11,6 +11,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public interface RestaurantRepository extends JpaRepository<Restaurant, Integer> {
     @Override
+    @Transactional
     Restaurant save(Restaurant restaurant);
 
     @Override
