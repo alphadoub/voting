@@ -12,7 +12,7 @@
     <context:component-scan base-package="ru.alphadoub.voting"/>
 
     <!-- Database Information -->
-    <context:property-placeholder location="classpath:hsqldb.properties" system-properties-mode="OVERRIDE"/>
+    <context:property-placeholder location="classpath:database/hsqldb.properties" system-properties-mode="OVERRIDE"/>
 
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"
           p:driverClassName="org.hsqldb.jdbcDriver"
@@ -21,10 +21,9 @@
           p:password="${database.password}"/>
 
     <jdbc:initialize-database data-source="dataSource" enabled="${database.init}">
-        <jdbc:script location="classpath:${jdbc.initLocation}"/>
-        <jdbc:script encoding="utf-8" location="classpath:populateDB.sql"/>
+        <jdbc:script location="classpath:database/${jdbc.initLocation}"/>
+        <jdbc:script encoding="utf-8" location="classpath:database/populateDB.sql"/>
     </jdbc:initialize-database>
-
 
     <!--JPA-->
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
