@@ -4,10 +4,15 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import ru.alphadoub.voting.model.Dish;
-import ru.alphadoub.voting.validation.NotFoundException;
+import ru.alphadoub.voting.validation.exception.NotFoundException;
 
 import javax.validation.ConstraintViolationException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.Month;
 
+import static java.time.LocalDate.now;
+import static java.time.LocalDate.of;
 import static ru.alphadoub.voting.DishTestData.*;
 import static ru.alphadoub.voting.DishTestData.assertMatch;
 import static ru.alphadoub.voting.DishTestData.getCreated;
@@ -24,7 +29,7 @@ public class DishServiceTest extends AbstractServiceTest {
         Dish newDish = getCreated();
         Dish created = service.create(newDish, RESTAURANT1_ID);
         newDish.setId(created.getId());
-        assertMatch(service.getAllByRestaurantId(RESTAURANT1_ID), newDish, DISH3, DISH1, DISH2);
+        assertMatch(service.getCurrentDayList(RESTAURANT1_ID), newDish, DISH3, DISH1, DISH2);
     }
 
     @Test
@@ -42,9 +47,9 @@ public class DishServiceTest extends AbstractServiceTest {
     }
 
     @Test
-    public void testDuplicatedNameCreate() throws Exception {
+    public void testDuplicatedNameDateCreate() throws Exception {
         thrown.expect(DataAccessException.class);
-        Dish newDish = new Dish("salad1", 500);
+        Dish newDish = new Dish("salad1", 500, now());
         service.create(newDish, RESTAURANT1_ID);
     }
 
@@ -82,9 +87,50 @@ public class DishServiceTest extends AbstractServiceTest {
     }
 
     @Test
+    public void testUpdateDateOfOldDish() throws Exception {
+        thrown.expect(IllegalArgumentException.class);
+        Dish updated = getUpdated(DISH4);
+        updated.setDate(now());
+        thrown.expectMessage("You can not change date of old dish. " + updated + " must be with date=" + DISH4.getDate());
+        service.update(updated, RESTAURANT1_ID);
+    }
+
+    @Test
+    public void testUpdateTodayDishWithWrongDate() throws Exception {
+        thrown.expect(IllegalArgumentException.class);
+        Dish updated = getUpdated(DISH1);
+
+        LocalTime now = LocalTime.now();
+        if (now.compareTo(LocalTime.of(11,0)) < 0) {
+            updated.setDate(of(2017, Month.DECEMBER, 31));
+            thrown.expectMessage("You can not set old date to dish. " + updated + " must not be with date earlier than " + LocalDate.now());
+        } else {
+            updated.setDate(of(2111, Month.DECEMBER, 31));
+            thrown.expectMessage("After 11:00 you can not change date of current day's dish. " + updated + " must be with date=" + DISH1.getDate());
+        }
+        service.update(updated, RESTAURANT1_ID);
+    }
+
+    @Test
+    public void testUpdateFutureDishWithWrongDate() throws Exception {
+        thrown.expect(IllegalArgumentException.class);
+        Dish updated = getUpdated(DISH7);
+
+        LocalTime now = LocalTime.now();
+        if (now.compareTo(LocalTime.of(11,0)) < 0) {
+            updated.setDate(of(2017, Month.DECEMBER, 31));
+            thrown.expectMessage("You can not set old date to dish. " + updated + " must not be with date earlier than " + LocalDate.now());
+        } else {
+            updated.setDate(LocalDate.now());
+            thrown.expectMessage("You can not set to dish current date after 11:00 or old date" + updated + " must be later than " + LocalDate.now());
+        }
+        service.update(updated, RESTAURANT1_ID);
+    }
+
+    @Test
     public void testDelete() throws Exception {
         service.delete(DISH1_ID, RESTAURANT1_ID);
-        assertMatch(service.getAllByRestaurantId(RESTAURANT1_ID), DISH3, DISH2);
+        assertMatch(service.getCurrentDayList(RESTAURANT1_ID), DISH3, DISH2);
     }
 
     @Test
@@ -95,28 +141,31 @@ public class DishServiceTest extends AbstractServiceTest {
 
     @Test
     public void testGetAllByRestaurantId() throws Exception {
-        assertMatch(service.getAllByRestaurantId(RESTAURANT1_ID), RESTAURANT1_MENU);
-        assertMatch(service.getAllByRestaurantId(RESTAURANT2_ID), RESTAURANT2_MENU);
-        assertMatch(service.getAllByRestaurantId(RESTAURANT3_ID), RESTAURANT3_MENU);
+        assertMatch(service.getCurrentDayList(RESTAURANT1_ID), RESTAURANT1_MENU);
+        assertMatch(service.getCurrentDayList(RESTAURANT2_ID), RESTAURANT2_MENU);
+        assertMatch(service.getCurrentDayList(RESTAURANT3_ID), RESTAURANT3_MENU);
 
     }
 
     @Test
     public void testGetAllByRestaurantIdNotFound() throws Exception {
         thrown.expect(NotFoundException.class);
-        service.getAllByRestaurantId(1);
+        service.getCurrentDayList(1);
     }
 
     @Test
     public void testValidation() throws Exception {
         //@NotBlank and @Size(2-100) name checking
-        validateRootCause(() -> service.create(new Dish("", 1000), RESTAURANT1_ID), ConstraintViolationException.class);
-        validateRootCause(() -> service.create(new Dish("D", 1000), RESTAURANT1_ID), ConstraintViolationException.class);
+        validateRootCause(() -> service.create(new Dish("", 1000, now()), RESTAURANT1_ID), ConstraintViolationException.class);
+        validateRootCause(() -> service.create(new Dish("D", 1000, now()), RESTAURANT1_ID), ConstraintViolationException.class);
 
         //@NotNull and @Range(50-50000) price checking
-        validateRootCause(() -> service.create(new Dish("newDish", null), RESTAURANT1_ID), ConstraintViolationException.class);
-        validateRootCause(() -> service.create(new Dish("newDish", 49), RESTAURANT1_ID), ConstraintViolationException.class);
-        validateRootCause(() -> service.create(new Dish("newDish", 50001), RESTAURANT1_ID), ConstraintViolationException.class);
+        validateRootCause(() -> service.create(new Dish("newDish", null, now()), RESTAURANT1_ID), ConstraintViolationException.class);
+        validateRootCause(() -> service.create(new Dish("newDish", 49, now()), RESTAURANT1_ID), ConstraintViolationException.class);
+        validateRootCause(() -> service.create(new Dish("newDish", 50001, now()), RESTAURANT1_ID), ConstraintViolationException.class);
+
+        //@NotNull date checking
+        validateRootCause(() -> service.create(new Dish("newDish", 50001, null), RESTAURANT1_ID), ConstraintViolationException.class);
 
 
 

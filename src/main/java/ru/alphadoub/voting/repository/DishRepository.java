@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 import ru.alphadoub.voting.model.Dish;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Transactional(readOnly = true)
@@ -23,5 +24,8 @@ public interface DishRepository extends JpaRepository<Dish, Integer> {
     int delete(int id, int restaurantId);
 
     @Query("SELECT d FROM Dish d WHERE d.restaurant.id=?1 ORDER BY d.price ASC")
-    List<Dish> getAllByRestaurantId(int restaurantId);
+    List<Dish> getAll(int restaurantId);
+
+    @Query("SELECT d FROM Dish d WHERE d.restaurant.id=?1 AND d.date=?2 ORDER BY d.price ASC")
+    List<Dish> getAllByDate(int restaurantId, LocalDate date);
 }

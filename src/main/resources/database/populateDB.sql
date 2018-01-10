@@ -19,13 +19,19 @@ INSERT INTO user_roles (role, user_id) VALUES
 
 INSERT INTO restaurants (name) VALUES 'Restaurant1', 'Restaurant2', 'Restaurant3';
 
-INSERT INTO dishes (name, price, restaurant_id) VALUES
-  ('salad1', 600, 100004),
-  ('steak1', 800, 100004),
-  ('vine1',  550, 100004),
-  ('salad2', 540, 100005),
-  ('steak2', 750, 100005),
-  ('vine2',  500, 100005),
-  ('salad3', 570, 100006),
-  ('steak3', 770, 100006),
-  ('vine3',  530, 100006);
+INSERT INTO dishes (name, price, date, restaurant_id) VALUES
+  ('salad1', 600, now(), 100004),
+  ('steak1', 800, now(), 100004),
+  ('vine1',  550, now(), 100004),
+  ('salad1', 500, '2017-12-31', 100004),
+  ('steak1', 700, '2017-12-31', 100004),
+  ('vine1',  450, '2017-12-31', 100004),
+  ('salad1', 700, '2118-12-31', 100004),
+  ('steak1', 900, '2118-12-31', 100004),
+  ('vine1',  650, '2118-12-31', 100004),
+  ('salad2', 540, now(), 100005),
+  ('steak2', 750, now(), 100005),
+  ('vine2',  500, now(), 100005),
+  ('salad3', 570, now(), 100006),
+  ('steak3', 770, now(), 100006),
+  ('vine3',  530, now(), 100006);

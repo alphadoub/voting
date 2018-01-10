@@ -9,9 +9,11 @@ import ru.alphadoub.voting.model.Restaurant;
 import ru.alphadoub.voting.repository.DishRepository;
 import ru.alphadoub.voting.repository.RestaurantRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static ru.alphadoub.voting.validation.ValidationUtil.checkNotFound;
+import static ru.alphadoub.voting.validation.ValidationUtil.checkWrongDateForUpdate;
 
 @Service
 public class DishServiceImpl implements DishService {
@@ -43,7 +45,8 @@ public class DishServiceImpl implements DishService {
     @Transactional
     public void update(Dish dish, int restaurantId) {
         Assert.notNull(dish, "dish must not be null");
-        checkNotFound(dishRepository.get(dish.getId(), restaurantId), "id=" + dish.getId() + " restaurantId=" + restaurantId);
+        Dish oldDish = checkNotFound(dishRepository.get(dish.getId(), restaurantId), "id=" + dish.getId() + " restaurantId=" + restaurantId);
+        checkWrongDateForUpdate(oldDish, dish);
         dish.setRestaurant(restaurantRepository.getOne(restaurantId));
         dishRepository.save(dish);
     }
@@ -55,8 +58,8 @@ public class DishServiceImpl implements DishService {
 
     @Override
     @Transactional
-    public List<Dish> getAllByRestaurantId(int restaurantId) {
+    public List<Dish> getCurrentDayList(int restaurantId) {
         checkNotFound(restaurantRepository.findOne(restaurantId), restaurantId);
-        return dishRepository.getAllByRestaurantId(restaurantId);
+        return dishRepository.getAllByDate(restaurantId, LocalDate.now());
     }
 }

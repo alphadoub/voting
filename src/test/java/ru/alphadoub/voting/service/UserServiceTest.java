@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import ru.alphadoub.voting.model.User;
-import ru.alphadoub.voting.validation.NotFoundException;
+import ru.alphadoub.voting.validation.exception.NotFoundException;
 
 import javax.validation.ConstraintViolationException;
 import java.util.List;
@@ -67,7 +67,7 @@ public class UserServiceTest extends AbstractServiceTest {
     @Test
     public void testUpdateNotFound() throws Exception {
         thrown.expect(NotFoundException.class);
-        User updated = new User(1, "UPDATED user", "updatedEmail", "updatedPassword");
+        User updated = new User(1, "UPDATED user", "updatedEmail@gmail.com", "updatedPassword");
         service.update(updated);
     }
 

@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import ru.alphadoub.voting.model.Restaurant;
-import ru.alphadoub.voting.validation.NotFoundException;
+import ru.alphadoub.voting.validation.exception.NotFoundException;
 
 import javax.validation.ConstraintViolationException;
 import java.util.List;

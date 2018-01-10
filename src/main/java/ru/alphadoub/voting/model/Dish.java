@@ -5,6 +5,7 @@ import ru.alphadoub.voting.ValidationGroups;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "dishes")
@@ -14,6 +15,10 @@ public class Dish extends BaseEntity {
     @Range(min = 50, max = 50000)
     private Integer price;
 
+    @Column(name = "date", nullable = false)
+    @NotNull
+    private LocalDate date;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id", nullable = false)
     @NotNull(groups = ValidationGroups.Persist.class)
@@ -22,17 +27,18 @@ public class Dish extends BaseEntity {
     public Dish() {
     }
 
-    public Dish(String name, Integer price) {
-        this(null, name, price);
+    public Dish(String name, Integer price, LocalDate date) {
+        this(null, name, price, date);
     }
 
-    public Dish(Integer id, String name, Integer price) {
-        this(id, name, price, null);
+    public Dish(Integer id, String name, Integer price, LocalDate date) {
+        this(id, name, price, date, null);
     }
 
-    public Dish(Integer id, String name, Integer price, Restaurant restaurant) {
+    public Dish(Integer id, String name, Integer price, LocalDate date, Restaurant restaurant) {
         super(id, name);
         this.price = price;
+        this.date = date;
         this.restaurant = restaurant;
     }
 
@@ -42,6 +48,14 @@ public class Dish extends BaseEntity {
 
     public void setPrice(Integer price) {
         this.price = price;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
     public Restaurant getRestaurant() {
@@ -58,6 +72,7 @@ public class Dish extends BaseEntity {
                 "id=" + getId() +
                 ", name=" + getName() +
                 ", price=" + price +
+                ", date=" + date +
                 '}';
     }
 }
