@@ -19,7 +19,7 @@ public class UserTestData {
     public static final User USER3 = new User(USER3_ID, "User3", "user3@gmail.com", "userPassword3", Role.ROLE_USER);
 
     public static void assertMatch(User actual, User expected) {
-        assertThat(actual).isEqualTo(expected);
+        assertThat(actual).isEqualToComparingFieldByField(expected);
     }
 
     public static void assertMatch(Iterable<User> actual, User... expected) {

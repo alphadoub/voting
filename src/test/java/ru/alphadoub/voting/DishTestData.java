@@ -37,7 +37,7 @@ public class DishTestData {
     public static final List<Dish> RESTAURANT3_MENU = Arrays.asList(DISH15, DISH13, DISH14);
 
     public static void assertMatch(Dish actual, Dish expected) {
-        assertThat(actual).isEqualTo(expected);
+        assertThat(actual).isEqualToIgnoringGivenFields(expected, "restaurant");
     }
 
     public static void assertMatch(Iterable<Dish> actual, Dish... expected) {
@@ -45,7 +45,7 @@ public class DishTestData {
     }
 
     public static void assertMatch(Iterable<Dish> actual, Iterable<Dish> expected) {
-        assertThat(actual).usingDefaultElementComparator().isEqualTo(expected);
+        assertThat(actual).usingElementComparatorIgnoringFields("restaurant").isEqualTo(expected);
     }
 
     public static Dish getCreated() {
