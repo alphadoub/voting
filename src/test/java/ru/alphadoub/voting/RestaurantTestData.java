@@ -1,6 +1,7 @@
 package ru.alphadoub.voting;
 
 import ru.alphadoub.voting.model.Restaurant;
+import ru.alphadoub.voting.to.RestaurantWithVotes;
 
 import java.util.Arrays;
 
@@ -15,12 +16,24 @@ public class RestaurantTestData {
     public static final Restaurant RESTAURANT2 = new Restaurant(RESTAURANT2_ID, "Restaurant2");
     public static final Restaurant RESTAURANT3 = new Restaurant(RESTAURANT3_ID, "Restaurant3");
 
+    public static final RestaurantWithVotes RESTAURANT1_WITH_VOTES = new RestaurantWithVotes(RESTAURANT1_ID, RESTAURANT1.getName(), (long) 2);
+    public static final RestaurantWithVotes RESTAURANT2_WITH_VOTES = new RestaurantWithVotes(RESTAURANT2_ID, RESTAURANT2.getName(), (long) 0);
+    public static final RestaurantWithVotes RESTAURANT3_WITH_VOTES = new RestaurantWithVotes(RESTAURANT3_ID, RESTAURANT3.getName(), (long) 1);
+
     public static void assertMatch(Restaurant actual, Restaurant expected) {
         assertThat(actual).isEqualToComparingFieldByField(expected);
     }
 
-    public static void assertMatch(Iterable<Restaurant> actual, Restaurant... expected) {
-        assertThat(actual).usingDefaultElementComparator().isEqualTo(Arrays.asList(expected));
+    public static void assertMatch(Iterable<Restaurant> actual, Restaurant...expected) {
+        assertThat(actual).usingFieldByFieldElementComparator().isEqualTo(Arrays.asList(expected));
+    }
+
+    public static void assertMatchWithVotes(RestaurantWithVotes actual, RestaurantWithVotes expected) {
+        assertThat(actual).isEqualToComparingFieldByField(expected);
+    }
+
+    public static void assertMatchWithVotes(Iterable<RestaurantWithVotes> actual, RestaurantWithVotes...expected) {
+        assertThat(actual).usingFieldByFieldElementComparator().isEqualTo(Arrays.asList(expected));
     }
 
     public static Restaurant getCreated() {
@@ -29,5 +42,13 @@ public class RestaurantTestData {
 
     public static Restaurant getUpdated(Restaurant restaurant) {
         return new Restaurant(restaurant.getId(), "UPDATED Restaurant");
+    }
+
+    public static RestaurantWithVotes getPlusOneVote(RestaurantWithVotes restaurantWithVotes) {
+        return new RestaurantWithVotes(restaurantWithVotes.getId(), restaurantWithVotes.getName(), restaurantWithVotes.getCountOfVotes() + 1);
+    }
+
+    public static RestaurantWithVotes getMinusOneVote(RestaurantWithVotes restaurantWithVotes) {
+        return new RestaurantWithVotes(restaurantWithVotes.getId(), restaurantWithVotes.getName(), restaurantWithVotes.getCountOfVotes() - 1);
     }
 }

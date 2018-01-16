@@ -22,6 +22,6 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Integer>
     @Query("DELETE FROM Restaurant r WHERE r.id=?1")
     int delete(int id);
 
-    @Query("SELECT r FROM Restaurant r ORDER BY r.countOfVotes DESC, r.name ASC")
+    @Query("SELECT r FROM Restaurant r ORDER BY r.name ASC")
     List<Restaurant> getAll();
 }

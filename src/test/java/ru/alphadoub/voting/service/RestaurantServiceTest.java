@@ -4,12 +4,16 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import ru.alphadoub.voting.model.Restaurant;
-import ru.alphadoub.voting.validation.exception.NotFoundException;
+import ru.alphadoub.voting.to.RestaurantWithVotes;
+import ru.alphadoub.voting.util.exception.NotFoundException;
 
 import javax.validation.ConstraintViolationException;
 import java.util.List;
 
 import static ru.alphadoub.voting.RestaurantTestData.*;
+import static ru.alphadoub.voting.UserTestData.USER2;
+import static ru.alphadoub.voting.UserTestData.USER3;
+import static ru.alphadoub.voting.util.ValidationUtil.NOT_FOUND_MESSAGE;
 
 
 public class RestaurantServiceTest extends AbstractServiceTest {
@@ -45,8 +49,10 @@ public class RestaurantServiceTest extends AbstractServiceTest {
 
     @Test
     public void testGetNotFound() throws Exception {
+        int wrongId = 1;
         thrown.expect(NotFoundException.class);
-        Restaurant restaurant = service.get(1);
+        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        service.get(wrongId);
     }
 
     @Test
@@ -65,8 +71,10 @@ public class RestaurantServiceTest extends AbstractServiceTest {
 
     @Test
     public void testUpdateNotFound() throws Exception {
+        int wrongId = 1;
         thrown.expect(NotFoundException.class);
-        Restaurant updated = new Restaurant(1, "UPDATED Restaurant");
+        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        Restaurant updated = new Restaurant(wrongId, "UPDATED Restaurant");
         service.update(updated);
     }
 
@@ -78,8 +86,10 @@ public class RestaurantServiceTest extends AbstractServiceTest {
 
     @Test
     public void testDeleteNotFound() throws Exception {
+        int wrongId = 1;
         thrown.expect(NotFoundException.class);
-        service.delete(1);
+        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        service.delete(wrongId);
     }
 
     @Test
@@ -87,6 +97,61 @@ public class RestaurantServiceTest extends AbstractServiceTest {
         List<Restaurant> all = service.getAll();
         assertMatch(all, RESTAURANT1, RESTAURANT2, RESTAURANT3);
     }
+
+    @Test
+    public void testGetWithCurrentDayVotes() throws Exception {
+        RestaurantWithVotes restaurant2WithVotes = service.getWithCurrentDayVotes(RESTAURANT2_ID);
+        assertMatchWithVotes(restaurant2WithVotes, RESTAURANT2_WITH_VOTES);
+
+        RestaurantWithVotes restaurant1WithVotes = service.getWithCurrentDayVotes(RESTAURANT1_ID);
+        assertMatchWithVotes(restaurant1WithVotes, RESTAURANT1_WITH_VOTES);
+    }
+
+    @Test
+    public void testGetWithCurrentDayVotesNotFound() throws Exception {
+        int wrongId = 1;
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        service.getWithCurrentDayVotes(wrongId);
+    }
+
+    @Test
+    public void testGetAllWithCurrentDayVotes() throws Exception {
+        List<RestaurantWithVotes> all = service.getAllWithCurrentDayVotes();
+        assertMatchWithVotes(all, RESTAURANT1_WITH_VOTES, RESTAURANT3_WITH_VOTES, RESTAURANT2_WITH_VOTES);
+    }
+
+    @Test
+    public void testVote() throws Exception {
+        service.vote(RESTAURANT2_ID, USER2);
+        assertMatchWithVotes(service.getWithCurrentDayVotes(RESTAURANT2_ID), getPlusOneVote(RESTAURANT2_WITH_VOTES));
+
+    }
+
+    @Test
+    public void testRevote() throws Exception {
+        service.vote(RESTAURANT3_ID, USER3);
+        assertMatchWithVotes(service.getWithCurrentDayVotes(RESTAURANT3_ID), getPlusOneVote(RESTAURANT3_WITH_VOTES));
+        assertMatchWithVotes(service.getWithCurrentDayVotes(RESTAURANT1_ID), getMinusOneVote(RESTAURANT1_WITH_VOTES));
+
+    }
+
+    @Test
+    public void testVoteNotFound() throws Exception {
+        int wrongId = 1;
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        service.vote(wrongId, USER2);
+
+    }
+
+    @Test
+    public void testNullUserVote() throws Exception {
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("user must not be null");
+        service.vote(RESTAURANT2_ID, null);
+    }
+
 
     @Test
     public void testValidation() throws Exception {

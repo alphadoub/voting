@@ -12,8 +12,8 @@ import ru.alphadoub.voting.repository.RestaurantRepository;
 import java.time.LocalDate;
 import java.util.List;
 
-import static ru.alphadoub.voting.validation.ValidationUtil.checkNotFound;
-import static ru.alphadoub.voting.validation.ValidationUtil.checkWrongDateForUpdate;
+import static ru.alphadoub.voting.util.ValidationUtil.checkNotFound;
+import static ru.alphadoub.voting.util.ValidationUtil.checkWrongDateForUpdate;
 
 @Service
 public class DishServiceImpl implements DishService {

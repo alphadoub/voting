@@ -5,48 +5,86 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import ru.alphadoub.voting.model.Restaurant;
+import ru.alphadoub.voting.model.User;
+import ru.alphadoub.voting.model.Vote;
 import ru.alphadoub.voting.repository.RestaurantRepository;
+import ru.alphadoub.voting.repository.VoteRepository;
+import ru.alphadoub.voting.to.RestaurantWithVotes;
+import ru.alphadoub.voting.util.RestaurantUtil;
 
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
-import static ru.alphadoub.voting.validation.ValidationUtil.checkNotFound;
+import static ru.alphadoub.voting.util.ValidationUtil.checkNotFound;
 
 @Service
 public class RestaurantServiceImpl implements RestaurantService {
-    private final RestaurantRepository repository;
+    private final RestaurantRepository restaurantRepository;
+
+    private final VoteRepository voteRepository;
 
     @Autowired
-    public RestaurantServiceImpl(RestaurantRepository repository) {
-        this.repository = repository;
+    public RestaurantServiceImpl(VoteRepository voteRepository, RestaurantRepository restaurantRepository) {
+        this.voteRepository = voteRepository;
+        this.restaurantRepository = restaurantRepository;
     }
 
     @Override
     public Restaurant create(Restaurant restaurant) {
         Assert.notNull(restaurant, "restaurant must not be null");
-        return repository.save(restaurant);
+        return restaurantRepository.save(restaurant);
     }
 
     @Override
     public Restaurant get(int id) {
-        return checkNotFound(repository.findOne(id), id);
+        return checkNotFound(restaurantRepository.findOne(id), id);
     }
 
     @Override
     @Transactional
     public void update(Restaurant restaurant) {
         Assert.notNull(restaurant, "restaurant must not be null");
-        checkNotFound(repository.findOne(restaurant.getId()), restaurant.getId());
-        repository.save(restaurant);
+        checkNotFound(restaurantRepository.findOne(restaurant.getId()), restaurant.getId());
+        restaurantRepository.save(restaurant);
     }
 
     @Override
     public void delete(int id) {
-        checkNotFound(repository.delete(id), id);
+        checkNotFound(restaurantRepository.delete(id), id);
     }
 
     @Override
     public List<Restaurant> getAll() {
-        return repository.getAll();
+        return restaurantRepository.getAll();
+    }
+
+    @Override
+    @Transactional
+    public RestaurantWithVotes getWithCurrentDayVotes(int id) {
+        Restaurant restaurant = checkNotFound(restaurantRepository.findOne(id), id);
+        long countOfVotes = voteRepository.countByRestaurantIdAndDate(id, LocalDate.now());
+        return RestaurantUtil.getWithVotes(restaurant, countOfVotes);
+    }
+
+    @Override
+    @Transactional
+    public List<RestaurantWithVotes> getAllWithCurrentDayVotes() {
+        List<Restaurant> restaurants = restaurantRepository.getAll();
+        if (restaurants.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Vote> votes = voteRepository.getAllByDate(LocalDate.now());
+        return RestaurantUtil.getWithVotes(restaurants, votes);
+    }
+
+    @Override
+    @Transactional
+    public void vote(int id, User user) {
+        Assert.notNull(user, "user must not be null");
+        Restaurant restaurant = checkNotFound(restaurantRepository.findOne(id), id);
+        Vote vote = new Vote(user, restaurant);
+        voteRepository.save(vote);
     }
 }
 

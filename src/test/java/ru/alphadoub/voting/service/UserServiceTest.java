@@ -4,12 +4,13 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import ru.alphadoub.voting.model.User;
-import ru.alphadoub.voting.validation.exception.NotFoundException;
+import ru.alphadoub.voting.util.exception.NotFoundException;
 
 import javax.validation.ConstraintViolationException;
 import java.util.List;
 
 import static ru.alphadoub.voting.UserTestData.*;
+import static ru.alphadoub.voting.util.ValidationUtil.NOT_FOUND_MESSAGE;
 
 public class UserServiceTest extends AbstractServiceTest {
     @Autowired
@@ -46,8 +47,10 @@ public class UserServiceTest extends AbstractServiceTest {
 
     @Test
     public void testGetNotFound() throws Exception {
+        int wrongId = 1;
         thrown.expect(NotFoundException.class);
-        service.get(1);
+        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        service.get(wrongId);
     }
 
     @Test
@@ -66,8 +69,10 @@ public class UserServiceTest extends AbstractServiceTest {
 
     @Test
     public void testUpdateNotFound() throws Exception {
+        int wrongId = 1;
         thrown.expect(NotFoundException.class);
-        User updated = new User(1, "UPDATED user", "updatedEmail@gmail.com", "updatedPassword");
+        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        User updated = new User(wrongId, "UPDATED user", "updatedEmail@gmail.com", "updatedPassword");
         service.update(updated);
     }
 
@@ -80,8 +85,10 @@ public class UserServiceTest extends AbstractServiceTest {
 
     @Test
     public void testDeleteNotFound() throws Exception {
+        int wrongId =1;
         thrown.expect(NotFoundException.class);
-        service.delete(1);
+        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        service.delete(wrongId);
     }
 
 
@@ -101,6 +108,7 @@ public class UserServiceTest extends AbstractServiceTest {
     @Test
     public void testGetByEmailNotFound() throws Exception {
         thrown.expect(NotFoundException.class);
+        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "email=notfound@gmail.com"));
         service.getByEmail("notfound@gmail.com");
     }
 

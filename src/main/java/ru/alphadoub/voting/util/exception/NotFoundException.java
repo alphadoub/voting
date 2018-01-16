@@ -1,4 +1,4 @@
-package ru.alphadoub.voting.validation.exception;
+package ru.alphadoub.voting.util.exception;
 
 public class NotFoundException extends RuntimeException {
     public NotFoundException(String message) {

@@ -26,15 +26,11 @@ public class User extends BaseEntity {
     @Size(min = 5, max = 64)
     private String password;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "restaurant_id")
-    private Restaurant restaurant;
-
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role")
     @ElementCollection(fetch = FetchType.EAGER)
-    @BatchSize(size = 200)
+    @BatchSize(size = 1000)
     private Set<Role> roles;
 
     public User() {
@@ -73,14 +69,6 @@ public class User extends BaseEntity {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Restaurant getRestaurant() {
-        return restaurant;
-    }
-
-    public void setRestaurant(Restaurant restaurant) {
-        this.restaurant = restaurant;
     }
 
     public Set<Role> getRoles() {

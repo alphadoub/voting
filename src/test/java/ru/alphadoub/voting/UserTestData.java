@@ -23,11 +23,7 @@ public class UserTestData {
     }
 
     public static void assertMatch(Iterable<User> actual, User... expected) {
-        assertMatch(actual, Arrays.asList(expected));
-    }
-
-    public static void assertMatch(Iterable<User> actual, Iterable<User> expected) {
-        assertThat(actual).usingDefaultElementComparator().isEqualTo(expected);
+        assertThat(actual).usingFieldByFieldElementComparator().isEqualTo(Arrays.asList(expected));
     }
 
     public static User getCreated() {

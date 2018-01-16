@@ -9,7 +9,7 @@ import ru.alphadoub.voting.repository.UserRepository;
 
 import java.util.List;
 
-import static ru.alphadoub.voting.validation.ValidationUtil.checkNotFound;
+import static ru.alphadoub.voting.util.ValidationUtil.checkNotFound;
 
 @Service
 public class UserServiceImpl implements UserService {

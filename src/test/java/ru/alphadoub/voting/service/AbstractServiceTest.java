@@ -14,7 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import ru.alphadoub.voting.validation.ValidationUtil;
+import ru.alphadoub.voting.util.ValidationUtil;
 
 import java.util.concurrent.TimeUnit;
 
