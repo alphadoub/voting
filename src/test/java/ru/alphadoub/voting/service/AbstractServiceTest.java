@@ -10,6 +10,8 @@ import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
@@ -27,6 +29,9 @@ public abstract class AbstractServiceTest {
     private static final Logger log = LoggerFactory.getLogger("result");
 
     private static StringBuilder results = new StringBuilder();
+
+    @Autowired
+    CacheManager cacheManager;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();

@@ -35,15 +35,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void update(User user) {
         Assert.notNull(user, "user must not be null");
-
-        /* эта проверка не нужна при редактировании собственного профиля,
-               * так как по сути она уже сделана при авторизации. При введении
-               * в проект security и класса, хранящего состояние авторизованного пользователя
-               * не забыть добавть доп.условие перед выполнением проверки
-               * if(user.getId() != AuthorizedUser.id()
-               */
         checkNotFound(repository.findOne(user.getId()), user.getId());
-
         repository.save(user);
     }
 

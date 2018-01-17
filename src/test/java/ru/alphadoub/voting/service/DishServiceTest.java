@@ -1,5 +1,6 @@
 package ru.alphadoub.voting.service;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -24,6 +25,12 @@ import static ru.alphadoub.voting.util.ValidationUtil.*;
 public class DishServiceTest extends AbstractServiceTest {
     @Autowired
     DishService service;
+
+    @Before
+    public void setUp() throws Exception {
+        cacheManager.getCache("dishes").clear();
+    }
+
 
     @Test
     public void testCreate() throws Exception {
@@ -150,7 +157,6 @@ public class DishServiceTest extends AbstractServiceTest {
         assertMatch(service.getCurrentDayList(RESTAURANT1_ID), RESTAURANT1_MENU);
         assertMatch(service.getCurrentDayList(RESTAURANT2_ID), RESTAURANT2_MENU);
         assertMatch(service.getCurrentDayList(RESTAURANT3_ID), RESTAURANT3_MENU);
-
     }
 
     @Test

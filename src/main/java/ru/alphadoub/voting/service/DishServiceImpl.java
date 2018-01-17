@@ -1,6 +1,8 @@
 package ru.alphadoub.voting.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -27,6 +29,7 @@ public class DishServiceImpl implements DishService {
         this.restaurantRepository = restaurantRepository;
     }
 
+    @CacheEvict(value = "dishes", allEntries = true)
     @Override
     @Transactional
     public Dish create(Dish dish, int restaurantId) {
@@ -36,26 +39,30 @@ public class DishServiceImpl implements DishService {
         return dishRepository.save(dish);
     }
 
+    @Cacheable("dishes")
     @Override
     public Dish get(int id, int restaurantId) {
         return checkNotFound(dishRepository.get(id, restaurantId), "id=" + id + " restaurantId=" + restaurantId);
     }
 
+    @CacheEvict(value = "dishes", allEntries = true)
     @Override
     @Transactional
     public void update(Dish dish, int restaurantId) {
         Assert.notNull(dish, "dish must not be null");
-        Dish oldDish = checkNotFound(dishRepository.get(dish.getId(), restaurantId), "id=" + dish.getId() + " restaurantId=" + restaurantId);
+        Dish oldDish = get(dish.getId(), restaurantId);
         checkWrongDateForUpdate(oldDish, dish);
         dish.setRestaurant(restaurantRepository.getOne(restaurantId));
         dishRepository.save(dish);
     }
 
+    @CacheEvict(value = "dishes", allEntries = true)
     @Override
     public void delete(int id, int restaurantId) {
         checkNotFound(dishRepository.delete(id, restaurantId), "id=" + id + " restaurantId=" + restaurantId );
     }
 
+    @Cacheable("dishes")
     @Override
     @Transactional
     public List<Dish> getCurrentDayList(int restaurantId) {

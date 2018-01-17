@@ -1,5 +1,6 @@
 package ru.alphadoub.voting.service;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -19,6 +20,11 @@ import static ru.alphadoub.voting.util.ValidationUtil.NOT_FOUND_MESSAGE;
 public class RestaurantServiceTest extends AbstractServiceTest {
     @Autowired
     RestaurantService service;
+
+    @Before
+    public void setUp() throws Exception {
+        cacheManager.getCache("restaurants").clear();
+    }
 
     @Test
     public void testCreate() throws Exception {

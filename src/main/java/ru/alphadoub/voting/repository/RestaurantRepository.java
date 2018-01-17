@@ -1,5 +1,6 @@
 package ru.alphadoub.voting.repository;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +15,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Integer>
     @Transactional
     Restaurant save(Restaurant restaurant);
 
+    @Cacheable("restaurants")
     @Override
     Restaurant findOne(Integer integer);
 
@@ -22,6 +24,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Integer>
     @Query("DELETE FROM Restaurant r WHERE r.id=?1")
     int delete(int id);
 
+    @Cacheable("restaurants")
     @Query("SELECT r FROM Restaurant r ORDER BY r.name ASC")
     List<Restaurant> getAll();
 }
