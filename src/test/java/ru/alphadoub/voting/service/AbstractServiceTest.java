@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 
-@ContextConfiguration("file:src/main/webapp/WEB-INF/mvc-dispatcher-servlet.xml")
+@ContextConfiguration("classpath:spring-app.xml")
 @RunWith(SpringJUnit4ClassRunner.class)
 @Sql(scripts = "classpath:database/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public abstract class AbstractServiceTest {

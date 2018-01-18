@@ -2,6 +2,8 @@ package ru.alphadoub.voting.model;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.Range;
 import ru.alphadoub.voting.ValidationGroups;
 
@@ -24,6 +26,7 @@ public class Dish extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @NotNull(groups = ValidationGroups.Persist.class)
     private Restaurant restaurant;
 
