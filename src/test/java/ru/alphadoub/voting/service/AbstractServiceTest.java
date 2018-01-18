@@ -1,8 +1,11 @@
 package ru.alphadoub.voting.service;
 
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.Stopwatch;
@@ -18,6 +21,8 @@ import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import ru.alphadoub.voting.util.ValidationUtil;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -32,6 +37,16 @@ public abstract class AbstractServiceTest {
 
     @Autowired
     CacheManager cacheManager;
+
+    @PersistenceContext
+    private EntityManager em;
+
+    @Before
+    public void clear2ndLevelHibernateCache() throws Exception {
+        Session s = (Session) em.getDelegate();
+        SessionFactory sf = s.getSessionFactory();
+        sf.getCache().evictAllRegions();
+    }
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();

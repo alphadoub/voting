@@ -15,7 +15,6 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Integer>
     @Transactional
     Restaurant save(Restaurant restaurant);
 
-    @Cacheable("restaurants")
     @Override
     Restaurant findOne(Integer integer);
 

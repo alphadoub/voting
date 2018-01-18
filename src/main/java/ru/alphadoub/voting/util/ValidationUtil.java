@@ -15,6 +15,7 @@ public class ValidationUtil {
     public static final String OLD_DATE_MESSAGE_AFTER_11 = "After 11:00 you can not set to dish current date or old date %s must be with date later than %s";
     public static final String OLD_DISH_MESSAGE = "You can not change date of old dish. %s must be with date=%s";
     public static final String OLD_DISH_MESSAGE_AFTER_11 = "After 11:00 you can not change date of current day's dish. %s must be with date=%s";
+    public static final String WRONG_RESTAURANT_ID_MESSAGE = "Wrong restaurant id. This dish belongs to another restaurant. Restaurant id must be=%s, but not %s";
 
     private ValidationUtil() {
     }
@@ -50,7 +51,7 @@ public class ValidationUtil {
 
     //часть логики проверки времени при обновлении можно будет перенести в контроллер,
     //так для неё нет необходимости "лезть вглубь приложения"
-    //например: старая дата (< Текущей) во входящем Dish
+    //например: старая дата во входящем Dish
     public static void checkWrongDateForUpdate(Dish oldDish, Dish newDish) {
         LocalDate today = LocalDate.now();
         LocalDate oldDate = oldDish.getDate();

@@ -14,8 +14,7 @@ import ru.alphadoub.voting.repository.RestaurantRepository;
 import java.time.LocalDate;
 import java.util.List;
 
-import static ru.alphadoub.voting.util.ValidationUtil.checkNotFound;
-import static ru.alphadoub.voting.util.ValidationUtil.checkWrongDateForUpdate;
+import static ru.alphadoub.voting.util.ValidationUtil.*;
 
 @Service
 public class DishServiceImpl implements DishService {
@@ -39,10 +38,12 @@ public class DishServiceImpl implements DishService {
         return dishRepository.save(dish);
     }
 
-    @Cacheable("dishes")
     @Override
     public Dish get(int id, int restaurantId) {
-        return checkNotFound(dishRepository.get(id, restaurantId), "id=" + id + " restaurantId=" + restaurantId);
+        Dish dish = checkNotFound(dishRepository.findOne(id), id);
+        int actualRestaurantId = dish.getRestaurant().getId();
+        Assert.isTrue(actualRestaurantId == restaurantId, String.format(WRONG_RESTAURANT_ID_MESSAGE, actualRestaurantId, restaurantId));
+        return dish;
     }
 
     @CacheEvict(value = "dishes", allEntries = true)
@@ -67,6 +68,6 @@ public class DishServiceImpl implements DishService {
     @Transactional
     public List<Dish> getCurrentDayList(int restaurantId) {
         checkNotFound(restaurantRepository.findOne(restaurantId), restaurantId);
-        return dishRepository.getAllByDate(restaurantId, LocalDate.now());
+        return dishRepository.getAllByRestaurantIdAndDate(restaurantId, LocalDate.now());
     }
 }

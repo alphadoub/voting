@@ -27,7 +27,7 @@ public class DishServiceTest extends AbstractServiceTest {
     DishService service;
 
     @Before
-    public void setUp() throws Exception {
+    public void clearSpringCache() throws Exception {
         cacheManager.getCache("dishes").clear();
     }
 
@@ -67,12 +67,20 @@ public class DishServiceTest extends AbstractServiceTest {
     public void testGet() throws Exception {
         Dish dish = service.get(DISH1_ID, RESTAURANT1_ID);
         assertMatch(dish, DISH1);
-
     }
+
     @Test
     public void testGetNotFound() throws Exception {
+        int wrongId = 1;
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + DISH1_ID + " restaurantId=" + RESTAURANT3_ID));
+        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        service.get(wrongId, RESTAURANT1_ID);
+    }
+
+    @Test
+    public void testGetWrongRestaurantId() throws Exception {
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage(String.format(WRONG_RESTAURANT_ID_MESSAGE, RESTAURANT1_ID, RESTAURANT3_ID));
         service.get(DISH1_ID, RESTAURANT3_ID);
     }
 
@@ -92,8 +100,18 @@ public class DishServiceTest extends AbstractServiceTest {
 
     @Test
     public void testUpdateNotFound() throws Exception {
+        int wrongId = 1;
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + DISH1_ID + " restaurantId=" + RESTAURANT3_ID));
+        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        Dish updated = getUpdated(DISH1);
+        updated.setId(wrongId);
+        service.update(updated, RESTAURANT1_ID);
+    }
+
+    @Test
+    public void testUpdateWrongRestaurantId() throws Exception {
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage(String.format(WRONG_RESTAURANT_ID_MESSAGE, RESTAURANT1_ID, RESTAURANT3_ID));
         Dish updated = getUpdated(DISH1);
         service.update(updated, RESTAURANT3_ID);
     }

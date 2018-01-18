@@ -22,7 +22,7 @@ public class RestaurantServiceTest extends AbstractServiceTest {
     RestaurantService service;
 
     @Before
-    public void setUp() throws Exception {
+    public void clearSpringCache() throws Exception {
         cacheManager.getCache("restaurants").clear();
     }
 

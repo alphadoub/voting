@@ -39,11 +39,6 @@ public class RestaurantServiceImpl implements RestaurantService {
         return restaurantRepository.save(restaurant);
     }
 
-    /* Метод вохвращает кэшируемвый результат, но аннотация кэширования
-         * перенесена в слой репозитория для обеспечения возможности использования
-         * результата кэширования внутри текущего класса. Как альтернатива создания
-         * дополнительно проксиобъекта сервиса в классе сервиса
-         */
     @Override
     public Restaurant get(int id) {
         return checkNotFound(restaurantRepository.findOne(id), id);
@@ -64,7 +59,12 @@ public class RestaurantServiceImpl implements RestaurantService {
         checkNotFound(restaurantRepository.delete(id), id);
     }
 
-    //Кэширование перенесено на уровень репозитория
+    /*
+         * Метод вохвращает кэшируемвый результат, но аннотация кэширования
+         * перенесена в слой репозитория для обеспечения возможности использования
+         * результата кэширования внутри текущего класса. Как альтернатива создания
+         * дополнительно проксиобъекта сервиса в классе сервиса
+         */
     @Override
     public List<Restaurant> getAll() {
         return restaurantRepository.getAll();
