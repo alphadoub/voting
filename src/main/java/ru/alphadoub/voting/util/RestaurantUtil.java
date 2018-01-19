@@ -17,10 +17,9 @@ public class RestaurantUtil {
         Map<Integer, Long> map = votes.stream().collect(Collectors.groupingBy(vote -> vote.getRestaurant().getId(), Collectors.counting()));
         return restaurants.stream()
                 .map(restaurant -> getWithVotes(restaurant, map.containsKey(restaurant.getId()) ? map.get(restaurant.getId()) : 0))
-                .sorted(Comparator.comparing(RestaurantWithVotes::getCountOfVotes).reversed())
+                .sorted(Comparator.comparing(RestaurantWithVotes::getCountOfVotes).reversed().thenComparing(RestaurantWithVotes::getName))
                 .collect(Collectors.toList());
     }
-
 
     public static RestaurantWithVotes getWithVotes(Restaurant restaurant, long countOfVotes) {
         return new RestaurantWithVotes(restaurant.getId(), restaurant.getName(), countOfVotes);

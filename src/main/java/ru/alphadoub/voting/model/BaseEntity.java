@@ -1,15 +1,18 @@
 package ru.alphadoub.voting.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.hibernate.Hibernate;
-import org.hibernate.validator.constraints.SafeHtml;
-import ru.alphadoub.voting.ValidationGroups;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+
 @MappedSuperclass
 @Access(AccessType.FIELD)
+@JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, isGetterVisibility = NONE, setterVisibility = NONE)
 public abstract class BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +22,7 @@ public abstract class BaseEntity {
     @Column(name = "name", nullable = false)
     @NotBlank
     @Size(min = 2, max = 100)
-    @SafeHtml(groups = {ValidationGroups.Rest.class})
+    //@SafeHtml(groups = {ValidationGroups.Rest.class})
     private String name;
 
     protected BaseEntity() {
