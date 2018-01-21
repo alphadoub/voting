@@ -64,7 +64,8 @@ public class UserServiceTest extends AbstractServiceTest {
     public void testNullUserUpdate() throws Exception {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("user must not be");
-        service.update(null);
+        User updated = null;
+        service.update(updated);
     }
 
     @Test

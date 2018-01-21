@@ -25,7 +25,7 @@ public class Restaurant extends BaseEntity {
     public String toString() {
         return "Restaurant{" +
                 "id=" + getId() +
-                ", name=" + getName() +
+                ", name='" + getName() + "\'" +
                 '}';
     }
 }

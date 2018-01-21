@@ -57,6 +57,10 @@ public class User extends BaseEntity {
         setRoles(roles);
     }
 
+    public User(User user) {
+        this(user.getId(), user.getName(), user.getEmail(), user.getPassword(), user.getRoles());
+    }
+
     public String getEmail() {
         return email;
     }
@@ -86,7 +90,7 @@ public class User extends BaseEntity {
     public String toString() {
         return "User{" +
                 "id=" + getId() +
-                ", name=" + getName() +
+                ", name='" + getName() + "\'" +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", roles=" + roles +

@@ -1,6 +1,7 @@
 package ru.alphadoub.voting.util;
 
 import org.springframework.util.Assert;
+import ru.alphadoub.voting.HasId;
 import ru.alphadoub.voting.model.BaseEntity;
 import ru.alphadoub.voting.model.Dish;
 import ru.alphadoub.voting.util.exception.NotFoundException;
@@ -71,7 +72,7 @@ public class ValidationUtil {
         Assert.isTrue(entity.getId() == null, entity + "must be new (id=null)");
     }
 
-    public static void assureIdConsistent(BaseEntity entity, int id) {
+    public static void assureIdConsistent(HasId entity, int id) {
         if (entity.getId() == null) {
             entity.setId(id);
         } else {

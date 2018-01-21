@@ -6,9 +6,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import ru.alphadoub.voting.model.User;
 import ru.alphadoub.voting.repository.UserRepository;
+import ru.alphadoub.voting.to.UserTo;
 
 import java.util.List;
 
+import static ru.alphadoub.voting.util.UserUtil.updateFromTo;
 import static ru.alphadoub.voting.util.ValidationUtil.checkNotFound;
 
 @Service
@@ -36,6 +38,13 @@ public class UserServiceImpl implements UserService {
     public void update(User user) {
         Assert.notNull(user, "user must not be null");
         checkNotFound(repository.findOne(user.getId()), user.getId());
+        repository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void update(UserTo userTo) {
+        User user = updateFromTo(get(userTo.getId()), userTo);
         repository.save(user);
     }
 

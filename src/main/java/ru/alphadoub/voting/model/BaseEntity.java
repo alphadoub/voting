@@ -1,19 +1,15 @@
 package ru.alphadoub.voting.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.hibernate.Hibernate;
+import ru.alphadoub.voting.HasId;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
-
 @MappedSuperclass
 @Access(AccessType.FIELD)
-@JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, isGetterVisibility = NONE, setterVisibility = NONE)
-public abstract class BaseEntity {
+public abstract class BaseEntity implements HasId {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Access(value = AccessType.PROPERTY)
