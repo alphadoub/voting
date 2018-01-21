@@ -2,6 +2,7 @@ package ru.alphadoub.voting.service;
 
 import ru.alphadoub.voting.model.Dish;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface DishService {
@@ -14,4 +15,6 @@ public interface DishService {
     void delete(int id, int restaurantId);
 
     List<Dish> getCurrentDayList(int restaurantId);
+
+    List<Dish> getListByDate(int restaurantId, LocalDate date);
 }

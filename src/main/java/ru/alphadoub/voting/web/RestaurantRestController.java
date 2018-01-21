@@ -33,7 +33,7 @@ public class RestaurantRestController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Restaurant create(@Validated(ValidationGroups.Rest.class) @RequestBody Restaurant restaurant) {
-        log.info("create restaurant {}", restaurant);
+        log.info("create {}", restaurant);
         checkIsNew(restaurant);
         return service.create(restaurant);
     }
@@ -46,7 +46,7 @@ public class RestaurantRestController {
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void update(@Validated(ValidationGroups.Rest.class) @RequestBody Restaurant restaurant, @PathVariable("id") int id) {
-        log.info("update restaurant {} with id={}", restaurant, id);
+        log.info("update {} with id={}", restaurant, id);
         assureIdConsistent(restaurant, id);
         service.update(restaurant);
     }

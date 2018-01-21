@@ -65,9 +65,14 @@ public class DishServiceImpl implements DishService {
 
     @Cacheable("dishes")
     @Override
-    @Transactional
     public List<Dish> getCurrentDayList(int restaurantId) {
+        return getListByDate(restaurantId, LocalDate.now());
+    }
+
+    @Override
+    @Transactional
+    public List<Dish> getListByDate(int restaurantId, LocalDate date) {
         checkNotFound(restaurantRepository.findOne(restaurantId), restaurantId);
-        return dishRepository.getAllByRestaurantIdAndDate(restaurantId, LocalDate.now());
+        return dishRepository.getAllByRestaurantIdAndDate(restaurantId, date);
     }
 }

@@ -17,7 +17,7 @@ import static ru.alphadoub.voting.util.ValidationUtil.*;
 @RestController
 @RequestMapping(value = DishRestController.URL)
 public class DishRestController {
-    private static final Logger log = LoggerFactory.getLogger(DishRestController.class);
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     static final String URL = RestaurantRestController.URL + "/{restaurant_id}/dishes";
 
@@ -31,7 +31,7 @@ public class DishRestController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Dish create(@Validated(ValidationGroups.Rest.class) @RequestBody Dish dish,
                        @PathVariable("restaurant_id") int restaurantId) {
-        log.info("create dish {} in restaurant with id={}", dish, restaurantId);
+        log.info("create {} in restaurant with id={}", dish, restaurantId);
         checkIsNew(dish);
         checkWrongDateForCreate(dish);
         return service.create(dish, restaurantId);
@@ -47,7 +47,7 @@ public class DishRestController {
     public void update(@Validated(ValidationGroups.Rest.class) @RequestBody Dish dish,
                        @PathVariable("restaurant_id") int restaurantId,
                        @PathVariable("id") int id) {
-        log.info("update dish {} with id={} from restaurant with id={}", dish, id, restaurantId);
+        log.info("update {} with id={} from restaurant with id={}", dish, id, restaurantId);
         assureIdConsistent(dish, id);
         service.update(dish, restaurantId);
     }
@@ -59,7 +59,7 @@ public class DishRestController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Dish> get(@PathVariable("restaurant_id") int restaurantId) {
+    public List<Dish> getCurrentDayList(@PathVariable("restaurant_id") int restaurantId) {
         log.info("get current day list of dishes from restaurant with id={}", restaurantId);
         return service.getCurrentDayList(restaurantId);
     }

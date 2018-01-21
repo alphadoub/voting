@@ -11,7 +11,13 @@ public class AuthorizedUser {
         */
     public static User user = new User(100001, "User", "user@gmail.com", "userPassword", Role.ROLE_USER);
 
+    private static int id = 100001;
+
+    public static int id() {
+         return id;
+    }
+
     public static void update(User updated) {
-         user = updated;
+        user = updated;
     }
 }

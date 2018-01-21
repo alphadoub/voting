@@ -178,6 +178,11 @@ public class DishServiceTest extends AbstractServiceTest {
     }
 
     @Test
+    public void testGetListByDate() throws Exception {
+        assertMatch(service.getListByDate(RESTAURANT1_ID, of(2118, Month.DECEMBER, 31)), DISH9, DISH7, DISH8);
+    }
+
+    @Test
     public void testGetCurrentDayListNotFound() throws Exception {
         int wrongId = 1;
         thrown.expect(NotFoundException.class);

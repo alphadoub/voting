@@ -12,8 +12,10 @@ import javax.validation.ConstraintViolationException;
 import java.util.List;
 
 import static ru.alphadoub.voting.RestaurantTestData.*;
-import static ru.alphadoub.voting.UserTestData.USER2;
-import static ru.alphadoub.voting.UserTestData.USER3;
+import static ru.alphadoub.voting.RestaurantTestData.assertMatch;
+import static ru.alphadoub.voting.RestaurantTestData.getCreated;
+import static ru.alphadoub.voting.RestaurantTestData.getUpdated;
+import static ru.alphadoub.voting.UserTestData.*;
 import static ru.alphadoub.voting.util.ValidationUtil.NOT_FOUND_MESSAGE;
 
 
@@ -135,11 +137,18 @@ public class RestaurantServiceTest extends AbstractServiceTest {
     }
 
     @Test
-    public void testRevote() throws Exception {
+    public void testRepeatVote() throws Exception {
+        service.vote(RESTAURANT1_ID, ADMIN);
+        service.vote(RESTAURANT1_ID, ADMIN);
+        assertMatchWithVotes(service.getWithCurrentDayVotes(RESTAURANT1_ID), RESTAURANT1_WITH_VOTES);
+
+    }
+
+    @Test
+    public void testChangeVote() throws Exception {
         service.vote(RESTAURANT3_ID, USER3);
         assertMatchWithVotes(service.getWithCurrentDayVotes(RESTAURANT3_ID), getPlusOneVote(RESTAURANT3_WITH_VOTES));
         assertMatchWithVotes(service.getWithCurrentDayVotes(RESTAURANT1_ID), getMinusOneVote(RESTAURANT1_WITH_VOTES));
-
     }
 
     @Test
@@ -148,7 +157,6 @@ public class RestaurantServiceTest extends AbstractServiceTest {
         thrown.expect(NotFoundException.class);
         thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
         service.vote(wrongId, USER2);
-
     }
 
     @Test
