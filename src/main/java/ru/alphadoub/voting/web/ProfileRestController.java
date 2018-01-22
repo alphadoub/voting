@@ -3,6 +3,7 @@ package ru.alphadoub.voting.web;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -43,6 +44,7 @@ public class ProfileRestController {
         service.update(UserUtil.updateFromTo(authorizedUser.getUser(), userTo));
     }
 
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @DeleteMapping
     public void delete(@AuthenticationPrincipal AuthorizedUser authorizedUser) {
         log.info("delete user with id={}", authorizedUser.getId());

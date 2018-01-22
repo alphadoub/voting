@@ -8,6 +8,7 @@ import ru.alphadoub.voting.service.UserService;
 import ru.alphadoub.voting.to.UserTo;
 import ru.alphadoub.voting.util.UserUtil;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -22,7 +23,8 @@ public class ProfileRestControllerTest extends AbstractControllerTest {
 
     @Test
     public void testGet() throws Exception {
-        mockMvc.perform(get(URL))
+        mockMvc.perform(get(URL)
+                .with(httpBasic(USER1.getEmail(), USER1.getPassword())))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -33,6 +35,7 @@ public class ProfileRestControllerTest extends AbstractControllerTest {
     public void testUpdate() throws Exception {
         UserTo updated = new UserTo(null, "UPDATED user", "updated@gmail.com", "updatedPassword");
         mockMvc.perform(put(URL)
+                .with(httpBasic(USER1.getEmail(), USER1.getPassword()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jacksonObjectMapper.writeValueAsString(updated)))
                 .andExpect(status().isOk())
@@ -42,9 +45,26 @@ public class ProfileRestControllerTest extends AbstractControllerTest {
 
     @Test
     public void testDelete() throws Exception {
-        mockMvc.perform(delete(URL))
+        mockMvc.perform(delete(URL)
+                .with(httpBasic(USER1.getEmail(), USER1.getPassword())))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
         assertMatch(service.getAll(), ADMIN, USER2, USER3);
+    }
+
+    @Test
+    public void test401Unauthorized() throws Exception {
+        //get
+        mockMvc.perform(get(URL)).andExpect(status().isUnauthorized());
+
+        //update
+        UserTo updated = new UserTo(null, "UPDATED user", "updated@gmail.com", "updatedPassword");
+        mockMvc.perform(put(URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jacksonObjectMapper.writeValueAsString(updated)))
+                .andExpect(status().isUnauthorized());
+
+        //delete
+        mockMvc.perform(delete(URL)).andExpect(status().isUnauthorized());
     }
 }

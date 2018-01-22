@@ -11,11 +11,14 @@ import ru.alphadoub.voting.service.RestaurantService;
 
 import static java.time.LocalTime.now;
 import static java.time.LocalTime.of;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.alphadoub.voting.RestaurantTestData.*;
+import static ru.alphadoub.voting.UserTestData.ADMIN;
+import static ru.alphadoub.voting.UserTestData.USER1;
 
 public class RestaurantRestControllerTest extends AbstractControllerTest {
     private static final String URL = RestaurantRestController.URL + '/';
@@ -33,9 +36,10 @@ public class RestaurantRestControllerTest extends AbstractControllerTest {
     public void testCreate() throws Exception {
         Restaurant newRestaurant = getCreated();
         ResultActions action = mockMvc.perform(post(URL)
+                .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jacksonObjectMapper.writeValueAsString(newRestaurant)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andDo(print());
 
         Restaurant returned = jacksonObjectMapper.readValue(getContent(action), Restaurant.class);
@@ -47,7 +51,8 @@ public class RestaurantRestControllerTest extends AbstractControllerTest {
 
     @Test
     public void testGet() throws Exception {
-        mockMvc.perform(get(URL + RESTAURANT1_ID))
+        mockMvc.perform(get(URL + RESTAURANT1_ID)
+                .with(httpBasic(USER1.getEmail(), USER1.getPassword())))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -58,6 +63,7 @@ public class RestaurantRestControllerTest extends AbstractControllerTest {
     public void testUpdate() throws Exception {
         Restaurant updated = getUpdated(RESTAURANT1);
         mockMvc.perform(put(URL + RESTAURANT1_ID)
+                .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jacksonObjectMapper.writeValueAsString(updated)))
                 .andExpect(status().isOk())
@@ -68,15 +74,17 @@ public class RestaurantRestControllerTest extends AbstractControllerTest {
 
     @Test
     public void testDelete() throws Exception {
-        mockMvc.perform(delete(URL + RESTAURANT2_ID))
+        mockMvc.perform(delete(URL + RESTAURANT2_ID)
+                .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword())))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
         assertMatch(service.getAll(), RESTAURANT1, RESTAURANT3);
     }
 
     @Test
     public void testGetAll() throws Exception {
-        mockMvc.perform(get(URL))
+        mockMvc.perform(get(URL)
+                .with(httpBasic(USER1.getEmail(), USER1.getPassword())))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -90,15 +98,16 @@ public class RestaurantRestControllerTest extends AbstractControllerTest {
                * После добавления обработки исключений сделаем вариативность ожидания статуса в зависимости от текущего времени
                */
         Assume.assumeTrue(now().compareTo(of(11, 0)) < 0);
-
-        mockMvc.perform(post(URL + RESTAURANT1_ID + "/vote"))
+        mockMvc.perform(post(URL + RESTAURANT1_ID + "/vote")
+                .with(httpBasic(USER1.getEmail(), USER1.getPassword())))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
 
     @Test
     public void testGetWithCurrentDayVotes() throws Exception {
-        mockMvc.perform(get(URL + RESTAURANT1_ID + "/with_votes"))
+        mockMvc.perform(get(URL + RESTAURANT1_ID + "/with_votes")
+                .with(httpBasic(USER1.getEmail(), USER1.getPassword())))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -107,10 +116,44 @@ public class RestaurantRestControllerTest extends AbstractControllerTest {
 
     @Test
     public void testGetAllWithCurrentDayVotes() throws Exception {
-        mockMvc.perform(get(URL + "with_votes"))
+        mockMvc.perform(get(URL + "with_votes")
+                .with(httpBasic(USER1.getEmail(), USER1.getPassword())))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(jacksonObjectMapper.writeValueAsString(RESTAURANTS_WITH_VOTES), true));
+    }
+
+    @Test
+    public void test401Unauthorized() throws Exception {
+        mockMvc.perform(post(URL + RESTAURANT1_ID + "/vote")).andExpect(status().isUnauthorized());//vote
+        mockMvc.perform(get(URL + RESTAURANT1_ID)).andExpect(status().isUnauthorized());//get
+        mockMvc.perform(get(URL + RESTAURANT1_ID + "/with_votes")).andExpect(status().isUnauthorized());//get with votes
+        mockMvc.perform(get(URL)).andExpect(status().isUnauthorized());//get all
+        mockMvc.perform(get(URL + "with_votes")).andExpect(status().isUnauthorized());//get all with votes
+    }
+
+    @Test
+    public void test403Forbidden() throws Exception {
+        //create
+        Restaurant newRestaurant = getCreated();
+        mockMvc.perform(post(URL)
+                .with(httpBasic(USER1.getEmail(), USER1.getPassword()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jacksonObjectMapper.writeValueAsString(newRestaurant)))
+                .andExpect(status().isForbidden());
+
+        //update
+        Restaurant updated = getUpdated(RESTAURANT1);
+        mockMvc.perform(put(URL + RESTAURANT1_ID)
+                .with(httpBasic(USER1.getEmail(), USER1.getPassword()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jacksonObjectMapper.writeValueAsString(updated)))
+                .andExpect(status().isForbidden());
+
+        //delete
+        mockMvc.perform(delete(URL + RESTAURANT2_ID)
+                .with(httpBasic(USER1.getEmail(), USER1.getPassword())))
+                .andExpect(status().isForbidden());
     }
 }
