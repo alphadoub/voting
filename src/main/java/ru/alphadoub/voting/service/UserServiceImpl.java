@@ -37,14 +37,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public User get(int id) {
-        return checkNotFound(repository.findOne(id), id);
+        return checkNotFound(repository.findById(id).orElse(null), id);
     }
 
     @Override
     @Transactional
     public void update(User user) {
         Assert.notNull(user, "user must not be null");
-        checkNotFound(repository.findOne(user.getId()), user.getId());
+        checkNotFound(repository.findById(user.getId()).orElse(null), user.getId());
         repository.save(prepareToSave(user, passwordEncoder));
     }
 

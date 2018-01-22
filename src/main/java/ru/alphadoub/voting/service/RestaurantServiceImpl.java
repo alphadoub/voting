@@ -40,7 +40,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     public Restaurant get(int id) {
-        return checkNotFound(restaurantRepository.findOne(id), id);
+        return checkNotFound(restaurantRepository.findById(id).orElse(null), id);
     }
 
     @CacheEvict(value = "restaurants", allEntries = true)
@@ -48,7 +48,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Transactional
     public void update(Restaurant restaurant) {
         Assert.notNull(restaurant, "restaurant must not be null");
-        checkNotFound(restaurantRepository.findOne(restaurant.getId()), restaurant.getId());
+        checkNotFound(restaurantRepository.findById(restaurant.getId()).orElse(null), restaurant.getId());
         restaurantRepository.save(restaurant);
     }
 

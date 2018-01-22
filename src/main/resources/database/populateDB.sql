@@ -1,3 +1,4 @@
+DELETE FROM votes;
 DELETE FROM user_roles;
 DELETE FROM users;
 DELETE FROM dishes;

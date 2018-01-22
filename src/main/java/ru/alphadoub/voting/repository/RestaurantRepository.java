@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.alphadoub.voting.model.Restaurant;
 
 import java.util.List;
+import java.util.Optional;
 
 @Transactional(readOnly = true)
 public interface RestaurantRepository extends JpaRepository<Restaurant, Integer> {
@@ -16,7 +17,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Integer>
     Restaurant save(Restaurant restaurant);
 
     @Override
-    Restaurant findOne(Integer integer);
+    Optional<Restaurant> findById(Integer id);
 
     @Modifying
     @Transactional

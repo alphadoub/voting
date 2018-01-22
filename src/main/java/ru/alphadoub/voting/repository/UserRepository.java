@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.alphadoub.voting.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 @Transactional(readOnly = true)
 public interface UserRepository extends JpaRepository<User, Integer> {
@@ -15,7 +16,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     User save(User user);
 
     @Override
-    User findOne(Integer id);
+    Optional<User> findById(Integer id);
 
     @Transactional
     @Modifying

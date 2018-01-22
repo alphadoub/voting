@@ -8,6 +8,7 @@ import ru.alphadoub.voting.model.Dish;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Transactional(readOnly = true)
 public interface DishRepository extends JpaRepository<Dish, Integer> {
@@ -16,7 +17,7 @@ public interface DishRepository extends JpaRepository<Dish, Integer> {
     Dish save(Dish dish);
 
     @Override
-    Dish findOne(Integer integer);
+    Optional<Dish> findById(Integer id);
 
     @Modifying
     @Transactional

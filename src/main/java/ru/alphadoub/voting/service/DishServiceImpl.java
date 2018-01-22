@@ -33,14 +33,14 @@ public class DishServiceImpl implements DishService {
     @Transactional
     public Dish create(Dish dish, int restaurantId) {
         Assert.notNull(dish, "dish must not be null");
-        Restaurant restaurant = checkNotFound(restaurantRepository.findOne(restaurantId), restaurantId);
+        Restaurant restaurant = checkNotFound(restaurantRepository.findById(restaurantId).orElse(null), restaurantId);
         dish.setRestaurant(restaurant);
         return dishRepository.save(dish);
     }
 
     @Override
     public Dish get(int id, int restaurantId) {
-        Dish dish = checkNotFound(dishRepository.findOne(id), id);
+        Dish dish = checkNotFound(dishRepository.findById(id).orElse(null), id);
         int actualRestaurantId = dish.getRestaurant().getId();
         Assert.isTrue(actualRestaurantId == restaurantId, String.format(WRONG_RESTAURANT_ID_MESSAGE, actualRestaurantId, restaurantId));
         return dish;
@@ -72,7 +72,7 @@ public class DishServiceImpl implements DishService {
     @Override
     @Transactional
     public List<Dish> getListByDate(int restaurantId, LocalDate date) {
-        checkNotFound(restaurantRepository.findOne(restaurantId), restaurantId);
+        checkNotFound(restaurantRepository.findById(restaurantId).orElse(null), restaurantId);
         return dishRepository.getAllByRestaurantIdAndDate(restaurantId, date);
     }
 }
