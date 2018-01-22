@@ -2,12 +2,15 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:security="http://www.springframework.org/schema/security"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+        http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
 
     <context:component-scan base-package="ru.alphadoub.**.web"/>
 
     <bean class="ru.alphadoub.voting.web.json.JacksonObjectMapper" id="jacksonObjectMapper"/>
+
+    <security:global-method-security secured-annotations="enabled" pre-post-annotations="enabled"/>
 
     <mvc:annotation-driven>
         <mvc:message-converters>
@@ -15,6 +18,9 @@
                 <property name="objectMapper" ref="jacksonObjectMapper"/>
             </bean>
         </mvc:message-converters>
+        <mvc:argument-resolvers>
+            <bean class="org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver "/>
+        </mvc:argument-resolvers>
     </mvc:annotation-driven>
 
 

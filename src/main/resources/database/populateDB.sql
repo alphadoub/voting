@@ -5,10 +5,10 @@ DELETE FROM restaurants;
 ALTER SEQUENCE global_seq RESTART WITH 100000;
 
 INSERT INTO users (name, email, password) VALUES
-  ('Admin', 'admin@gmail.com', 'adminPassword'),
-  ('User', 'user@gmail.com', 'userPassword'),
-  ('User2', 'user2@gmail.com', 'userPassword2'),
-  ('User3', 'user3@gmail.com', 'userPassword3');
+  ('Admin', 'admin@gmail.com', '{noop}adminPassword'),
+  ('User', 'user@gmail.com', '{noop}userPassword'),
+  ('User2', 'user2@gmail.com', '{noop}userPassword2'),
+  ('User3', 'user3@gmail.com', '{noop}userPassword3');
 
 INSERT INTO user_roles (role, user_id) VALUES
   ('ROLE_ADMIN', 100000),

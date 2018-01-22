@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.alphadoub.voting.AuthorizedUser;
@@ -12,7 +14,6 @@ import ru.alphadoub.voting.model.Restaurant;
 import ru.alphadoub.voting.service.RestaurantService;
 import ru.alphadoub.voting.to.RestaurantWithVotes;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import static ru.alphadoub.voting.util.ValidationUtil.*;
@@ -31,6 +32,7 @@ public class RestaurantRestController {
         this.service = service;
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Restaurant create(@Validated(ValidationGroups.Rest.class) @RequestBody Restaurant restaurant) {
         log.info("create {}", restaurant);
@@ -44,6 +46,7 @@ public class RestaurantRestController {
         return service.get(id);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void update(@Validated(ValidationGroups.Rest.class) @RequestBody Restaurant restaurant, @PathVariable("id") int id) {
         log.info("update {} with id={}", restaurant, id);
@@ -51,6 +54,7 @@ public class RestaurantRestController {
         service.update(restaurant);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(value = "/{id}")
     public void delete(@PathVariable("id") int id) {
         log.info("delete restaurant with id={}", id);
@@ -64,10 +68,10 @@ public class RestaurantRestController {
     }
 
     @PostMapping(value = "/{id}/vote")
-    public void vote(@PathVariable("id") int id, HttpServletRequest req) {
+    public void vote(@PathVariable("id") int id, @AuthenticationPrincipal AuthorizedUser authorizedUser) {
         log.info("vote for restaurant with id={}", id);
         checkVotingTime();
-        service.vote(id, AuthorizedUser.user);
+        service.vote(id, authorizedUser.getUser());
     }
 
     @GetMapping(value = "/{id}/with_votes", produces = MediaType.APPLICATION_JSON_VALUE)

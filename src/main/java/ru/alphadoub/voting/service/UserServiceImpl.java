@@ -1,31 +1,38 @@
 package ru.alphadoub.voting.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import ru.alphadoub.voting.AuthorizedUser;
 import ru.alphadoub.voting.model.User;
 import ru.alphadoub.voting.repository.UserRepository;
-import ru.alphadoub.voting.to.UserTo;
 
 import java.util.List;
 
-import static ru.alphadoub.voting.util.UserUtil.updateFromTo;
+import static ru.alphadoub.voting.util.UserUtil.prepareToSave;
 import static ru.alphadoub.voting.util.ValidationUtil.checkNotFound;
 
-@Service
-public class UserServiceImpl implements UserService {
+@Service("userService")
+public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository repository;
 
+    private final PasswordEncoder passwordEncoder;
+
     @Autowired
-    public UserServiceImpl(UserRepository repository) {
+    public UserServiceImpl(UserRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public User create(User user) {
         Assert.notNull(user, "user must not be null");
-        return repository.save(user);
+        return repository.save(prepareToSave(user, passwordEncoder));
     }
 
     @Override
@@ -38,14 +45,7 @@ public class UserServiceImpl implements UserService {
     public void update(User user) {
         Assert.notNull(user, "user must not be null");
         checkNotFound(repository.findOne(user.getId()), user.getId());
-        repository.save(user);
-    }
-
-    @Override
-    @Transactional
-    public void update(UserTo userTo) {
-        User user = updateFromTo(get(userTo.getId()), userTo);
-        repository.save(user);
+        repository.save(prepareToSave(user, passwordEncoder));
     }
 
     @Override
@@ -62,5 +62,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getAll() {
         return repository.getAll();
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = repository.getByEmail(email.toLowerCase());
+        if (user == null) {
+            throw new UsernameNotFoundException("User " + email + " is not found");
+        }
+        return new AuthorizedUser(user);
     }
 }

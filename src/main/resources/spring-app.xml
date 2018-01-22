@@ -10,61 +10,63 @@
         http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
 
-       <context:component-scan base-package="ru.alphadoub.**.repository"/>
-       <context:component-scan base-package="ru.alphadoub.**.service"/>
+    <import resource="spring-security.xml"/>
+    <context:component-scan base-package="ru.alphadoub.**.repository"/>
+    <context:component-scan base-package="ru.alphadoub.**.service"/>
 
-       <!-- Database Information -->
-       <context:property-placeholder location="classpath:database/hsqldb.properties" system-properties-mode="OVERRIDE"/>
+    <!-- Database Information -->
+    <context:property-placeholder location="classpath:database/hsqldb.properties" system-properties-mode="OVERRIDE"/>
 
-       <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"
-             p:driverClassName="org.hsqldb.jdbcDriver"
-             p:url="${database.url}"
-             p:username="${database.username}"
-             p:password="${database.password}"/>
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"
+          p:driverClassName="org.hsqldb.jdbcDriver"
+          p:url="${database.url}"
+          p:username="${database.username}"
+          p:password="${database.password}"/>
 
-       <jdbc:initialize-database data-source="dataSource" enabled="${database.init}">
-              <jdbc:script location="classpath:database/${jdbc.initLocation}"/>
-              <jdbc:script encoding="utf-8" location="classpath:database/populateDB.sql"/>
-       </jdbc:initialize-database>
-
-
-       <!--JPA-->
-       <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
-             p:dataSource-ref="dataSource"
-             p:packagesToScan="ru.alphadoub.**.model">
-
-              <property name="jpaPropertyMap">
-                     <map>
-                            <entry key="#{T(org.hibernate.cfg.AvailableSettings).FORMAT_SQL}" value="${hibernate.format_sql}"/>
-                            <entry key="#{T(org.hibernate.cfg.AvailableSettings).USE_SQL_COMMENTS}" value="${hibernate.use_sql_comments}"/>
-                            <entry key="#{T(org.hibernate.cfg.AvailableSettings).CACHE_REGION_FACTORY}" value="org.hibernate.cache.jcache.JCacheRegionFactory"/>
-                            <entry key="#{T(org.hibernate.cache.jcache.JCacheRegionFactory).PROVIDER}" value="org.ehcache.jsr107.EhcacheCachingProvider"/>
-                            <entry key="#{T(org.hibernate.cfg.AvailableSettings).USE_SECOND_LEVEL_CACHE}" value="true"/>
-                     </map>
-              </property>
-
-              <property name="jpaVendorAdapter">
-                     <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
-                           p:showSql="${jpa.showSql}">
-                     </bean>
-              </property>
-       </bean>
-
-       <jpa:repositories base-package="ru.alphadoub.**.repository"/>
-
-       <tx:annotation-driven/>
-
-       <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
-             p:entityManagerFactory-ref="entityManagerFactory"/>
+    <jdbc:initialize-database data-source="dataSource" enabled="${database.init}">
+        <jdbc:script location="classpath:database/${jdbc.initLocation}"/>
+        <jdbc:script encoding="utf-8" location="classpath:database/populateDB.sql"/>
+    </jdbc:initialize-database>
 
 
-       <!--Cache-->
-       <cache:annotation-driven cache-manager="ehCacheManager"/>
+    <!--JPA-->
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+          p:dataSource-ref="dataSource"
+          p:packagesToScan="ru.alphadoub.**.model">
 
-       <bean id="ehCacheManager" class="org.springframework.cache.jcache.JCacheCacheManager">
-              <property name="cacheManager">
-                     <bean class="org.springframework.cache.jcache.JCacheManagerFactoryBean"
-                           p:cacheManagerUri="classpath:cache/ehcache.xml"/>
-              </property>
-       </bean>
+        <property name="jpaPropertyMap">
+            <map>
+                <entry key="#{T(org.hibernate.cfg.AvailableSettings).FORMAT_SQL}" value="${hibernate.format_sql}"/>
+                <entry key="#{T(org.hibernate.cfg.AvailableSettings).USE_SQL_COMMENTS}" value="${hibernate.use_sql_comments}"/>
+                <entry key="#{T(org.hibernate.cfg.AvailableSettings).CACHE_REGION_FACTORY}" value="org.hibernate.cache.jcache.JCacheRegionFactory"/>
+                <entry key="#{T(org.hibernate.cache.jcache.JCacheRegionFactory).PROVIDER}" value="org.ehcache.jsr107.EhcacheCachingProvider"/>
+                <entry key="#{T(org.hibernate.cfg.AvailableSettings).USE_SECOND_LEVEL_CACHE}" value="true"/>
+            </map>
+        </property>
+
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
+                  p:showSql="${jpa.showSql}">
+            </bean>
+        </property>
+    </bean>
+
+    <jpa:repositories base-package="ru.alphadoub.**.repository"/>
+
+    <tx:annotation-driven/>
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
+          p:entityManagerFactory-ref="entityManagerFactory"/>
+
+
+    <!--Cache-->
+    <cache:annotation-driven cache-manager="ehCacheManager"/>
+
+    <bean id="ehCacheManager" class="org.springframework.cache.jcache.JCacheCacheManager">
+        <property name="cacheManager">
+            <bean class="org.springframework.cache.jcache.JCacheManagerFactoryBean"
+                  p:cacheManagerUri="classpath:cache/ehcache.xml"/>
+        </property>
+    </bean>
+
 </beans>

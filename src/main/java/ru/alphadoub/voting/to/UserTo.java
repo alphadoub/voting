@@ -3,9 +3,8 @@ package ru.alphadoub.voting.to;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-import java.io.Serializable;
 
-public class UserTo extends BaseTo implements Serializable {
+public class UserTo extends BaseTo {
     @Email
     @NotBlank
     @Size(max = 100)
@@ -13,7 +12,7 @@ public class UserTo extends BaseTo implements Serializable {
     private String email;
 
     @NotBlank
-    @Size(min = 5, max = 64)
+    @Size(min = 5, max = 20)
     private String password;
 
     public UserTo() {

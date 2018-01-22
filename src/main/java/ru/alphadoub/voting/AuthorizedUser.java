@@ -1,23 +1,31 @@
 package ru.alphadoub.voting;
 
-import ru.alphadoub.voting.model.Role;
 import ru.alphadoub.voting.model.User;
 
-public class AuthorizedUser {
-    /*
-        * Временная заглушка. Пока имитируем аворизованного пользователя и возможность его редактирования
-        * статическим полем и статическим методом. При введении spring security
-        * и использовании @AuthenticationPrincipal потребность в статичсеких элементах отпадёт.
-        */
-    public static User user = new User(100001, "User", "user@gmail.com", "userPassword", Role.ROLE_USER);
+public class AuthorizedUser extends org.springframework.security.core.userdetails.User {
+    private static final long serialVersionUID = 1L;
 
-    private static int id = 100001;
+    private User user;
 
-    public static int id() {
-         return id;
+    public AuthorizedUser(User user) {
+        super(user.getEmail(), user.getPassword(), user.getRoles());
+        this.user =user;
     }
 
-    public static void update(User updated) {
-        user = updated;
+    public User getUser() {
+        return user;
+    }
+
+    public void update(User updatedUser) {
+        user = updatedUser;
+    }
+
+    public int getId() {
+        return user.getId();
+    }
+
+    @Override
+    public String toString() {
+        return user.toString();
     }
 }

@@ -19,11 +19,11 @@ public class UserTestData {
     public static final User USER3 = new User(USER3_ID, "User3", "user3@gmail.com", "userPassword3", Role.ROLE_USER);
 
     public static void assertMatch(User actual, User expected) {
-        assertThat(actual).isEqualToComparingFieldByField(expected);
+        assertThat(actual).isEqualToIgnoringGivenFields(expected, "password");
     }
 
     public static void assertMatch(Iterable<User> actual, User... expected) {
-        assertThat(actual).usingFieldByFieldElementComparator().isEqualTo(Arrays.asList(expected));
+        assertThat(actual).usingElementComparatorIgnoringFields("password").isEqualTo(Arrays.asList(expected));
     }
 
     public static User getCreated() {

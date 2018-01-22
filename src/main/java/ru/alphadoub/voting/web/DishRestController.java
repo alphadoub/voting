@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.alphadoub.voting.ValidationGroups;
@@ -28,6 +29,7 @@ public class DishRestController {
         this.service = service;
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Dish create(@Validated(ValidationGroups.Rest.class) @RequestBody Dish dish,
                        @PathVariable("restaurant_id") int restaurantId) {
@@ -43,6 +45,7 @@ public class DishRestController {
         return service.get(id, restaurantId);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void update(@Validated(ValidationGroups.Rest.class) @RequestBody Dish dish,
                        @PathVariable("restaurant_id") int restaurantId,
@@ -52,6 +55,7 @@ public class DishRestController {
         service.update(dish, restaurantId);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(value = "/{id}")
     public void delete(@PathVariable("restaurant_id") int restaurantId, @PathVariable("id") int id) {
         log.info("delete dish with id={} from restaurant with id={}", id, restaurantId);

@@ -21,15 +21,14 @@ import static ru.alphadoub.voting.util.ValidationUtil.checkNotFound;
 
 @Service
 public class RestaurantServiceImpl implements RestaurantService {
-
     private final RestaurantRepository restaurantRepository;
 
     private final VoteRepository voteRepository;
 
     @Autowired
-    public RestaurantServiceImpl(VoteRepository voteRepository, RestaurantRepository restaurantRepository) {
-        this.voteRepository = voteRepository;
+    public RestaurantServiceImpl(RestaurantRepository restaurantRepository, VoteRepository voteRepository) {
         this.restaurantRepository = restaurantRepository;
+        this.voteRepository = voteRepository;
     }
 
     @CacheEvict(value = "restaurants", allEntries = true)

@@ -129,9 +129,7 @@ public class UserServiceTest extends AbstractServiceTest {
         validateRootCause(() -> service.create(new User("newUser", "wrongFormat@@@gmail.com", "password")), ConstraintViolationException.class);
         validateRootCause(() -> service.create(new User("newUser", "", "password")), ConstraintViolationException.class);
 
-        //@NotBlank and @Size password checking
-        validateRootCause(() -> service.create(new User("newUser", "newUser@gmail.com", "  ")), ConstraintViolationException.class);
-        validateRootCause(() -> service.create(new User("newUser", "newUser@gmail.com", "123")), ConstraintViolationException.class);
-
+        //@NotBlank password checking
+        validateRootCause(() -> service.create(new User("newUser", "newUser@gmail.com", "")), ConstraintViolationException.class);
     }
 }
