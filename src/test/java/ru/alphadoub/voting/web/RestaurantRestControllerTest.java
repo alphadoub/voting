@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.alphadoub.voting.model.Restaurant;
 import ru.alphadoub.voting.service.RestaurantService;
 
@@ -14,8 +16,8 @@ import static java.time.LocalTime.of;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static ru.alphadoub.voting.Messages.NOT_FOUND;
 import static ru.alphadoub.voting.RestaurantTestData.*;
 import static ru.alphadoub.voting.UserTestData.ADMIN;
 import static ru.alphadoub.voting.UserTestData.USER1;
@@ -156,4 +158,79 @@ public class RestaurantRestControllerTest extends AbstractControllerTest {
                 .with(httpBasic(USER1.getEmail(), USER1.getPassword())))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    public void test422NotFound() throws Exception {
+        int wrongId = 111111;
+
+        //get
+        mockMvc.perform(get(URL + wrongId)
+                .with(httpBasic(USER1.getEmail(), USER1.getPassword())))
+                .andExpect(status().isUnprocessableEntity())
+                .andDo(print())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value(String.format(NOT_FOUND, "id=" + wrongId)));
+
+        //delete
+        mockMvc.perform(delete(URL + wrongId)
+                .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword())))
+                .andDo(print())
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value(String.format(NOT_FOUND, "id=" + wrongId)));
+
+    }
+
+    @Test
+    public void testInvalid422Update() throws Exception {
+        Restaurant invalid = new Restaurant(RESTAURANT1_ID, " ");
+        mockMvc.perform(put(URL + RESTAURANT1_ID)
+                .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jacksonObjectMapper.writeValueAsString(invalid)))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andDo(print());
+    }
+
+    @Test
+    public void testInvalid422Create() throws Exception {
+        Restaurant invalid = new Restaurant(" ");
+        mockMvc.perform(post(URL)
+                .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jacksonObjectMapper.writeValueAsString(invalid)))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andDo(print());
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NEVER)
+    public void testUpdateDuplicate() throws Exception {
+        Restaurant notUnique = new Restaurant(RESTAURANT1_ID, RESTAURANT2.getName());
+        mockMvc.perform(put(URL + RESTAURANT1_ID)
+                .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jacksonObjectMapper.writeValueAsString(notUnique)))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andDo(print());
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NEVER)
+    public void testCreateDuplicate() throws Exception {
+        Restaurant notUnique = new Restaurant(RESTAURANT2.getName());
+        mockMvc.perform(post(URL)
+                .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jacksonObjectMapper.writeValueAsString(notUnique)))
+                .andExpect(status().isConflict())
+                .andDo(print());
+    }
+
+
+
+
 }

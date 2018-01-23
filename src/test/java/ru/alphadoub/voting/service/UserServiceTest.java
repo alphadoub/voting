@@ -9,8 +9,8 @@ import ru.alphadoub.voting.util.exception.NotFoundException;
 import javax.validation.ConstraintViolationException;
 import java.util.List;
 
+import static ru.alphadoub.voting.Messages.NOT_FOUND;
 import static ru.alphadoub.voting.UserTestData.*;
-import static ru.alphadoub.voting.util.ValidationUtil.NOT_FOUND_MESSAGE;
 
 public class UserServiceTest extends AbstractServiceTest {
     @Autowired
@@ -49,7 +49,7 @@ public class UserServiceTest extends AbstractServiceTest {
     public void testGetNotFound() throws Exception {
         int wrongId = 1;
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        thrown.expectMessage(String.format(NOT_FOUND, "id=" + wrongId));
         service.get(wrongId);
     }
 
@@ -72,7 +72,7 @@ public class UserServiceTest extends AbstractServiceTest {
     public void testUpdateNotFound() throws Exception {
         int wrongId = 1;
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        thrown.expectMessage(String.format(NOT_FOUND, "id=" + wrongId));
         User updated = new User(wrongId, "UPDATED user", "updatedEmail@gmail.com", "updatedPassword");
         service.update(updated);
     }
@@ -88,7 +88,7 @@ public class UserServiceTest extends AbstractServiceTest {
     public void testDeleteNotFound() throws Exception {
         int wrongId =1;
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        thrown.expectMessage(String.format(NOT_FOUND, "id=" + wrongId));
         service.delete(wrongId);
     }
 
@@ -109,7 +109,7 @@ public class UserServiceTest extends AbstractServiceTest {
     @Test
     public void testGetByEmailNotFound() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "email=notfound@gmail.com"));
+        thrown.expectMessage(String.format(NOT_FOUND, "email=notfound@gmail.com"));
         service.getByEmail("notfound@gmail.com");
     }
 

@@ -10,15 +10,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import static java.lang.String.format;
+import static ru.alphadoub.voting.Messages.*;
 
 public class ValidationUtil {
-    public static final String NOT_FOUND_MESSAGE = "Not found entity with %s";
-    public static final String OLD_DATE_MESSAGE = "You can not set old date to dish. %s must not be with date earlier than %s";
-    public static final String OLD_DATE_MESSAGE_AFTER_11 = "After 11:00 you can not set to dish current date or old date. %s must be with date later than %s";
-    public static final String OLD_DISH_MESSAGE = "You can not change date of old dish. %s must be with date=%s";
-    public static final String OLD_DISH_MESSAGE_AFTER_11 = "After 11:00 you can not change date of current day's dish. %s must be with date=%s";
-    public static final String WRONG_RESTAURANT_ID_MESSAGE = "Wrong restaurant id. This dish belongs to another restaurant. Restaurant id must be=%s, but not %s";
-
     private ValidationUtil() {
     }
 
@@ -27,7 +21,7 @@ public class ValidationUtil {
     }
 
     public static <T> T checkNotFound(T object, String arg) {
-        if (object == null) throw new NotFoundException(format(NOT_FOUND_MESSAGE, arg));
+        if (object == null) throw new NotFoundException(format(NOT_FOUND, arg));
         return object;
     }
 
@@ -36,15 +30,15 @@ public class ValidationUtil {
     }
 
     public static void checkNotFound(int numberOfChanges, String arg) {
-        if (numberOfChanges == 0) throw new NotFoundException(format(NOT_FOUND_MESSAGE, arg));
+        if (numberOfChanges == 0) throw new NotFoundException(format(NOT_FOUND, arg));
     }
 
     public static void checkWrongDateForCreate(Dish dish) {
         if (LocalTime.now().compareTo(LocalTime.of(11, 0)) < 0) {
-            Assert.isTrue(dish.getDate().compareTo(LocalDate.now()) >= 0, String.format(OLD_DATE_MESSAGE, dish, LocalDate.now()));
+            Assert.isTrue(dish.getDate().compareTo(LocalDate.now()) >= 0, String.format(OLD_DATE, dish, LocalDate.now()));
         }
         else {
-            Assert.isTrue(dish.getDate().compareTo(LocalDate.now()) > 0, String.format(OLD_DATE_MESSAGE_AFTER_11, dish, LocalDate.now()));
+            Assert.isTrue(dish.getDate().compareTo(LocalDate.now()) > 0, String.format(OLD_DATE_AFTER_11, dish, LocalDate.now()));
         }
     }
     
@@ -54,15 +48,15 @@ public class ValidationUtil {
         LocalDate newDate = newDish.getDate();
 
         if (oldDate.compareTo(today) < 0) {
-            Assert.isTrue(newDate.equals(oldDate), String.format(OLD_DISH_MESSAGE, newDish, oldDate));
+            Assert.isTrue(newDate.equals(oldDate), String.format(OLD_DISH, newDish, oldDate));
         } else {
             if (LocalTime.now().compareTo(LocalTime.of(11, 0)) < 0) {
-                Assert.isTrue(newDate.compareTo(today) >= 0, String.format(OLD_DATE_MESSAGE, newDish, today));
+                Assert.isTrue(newDate.compareTo(today) >= 0, String.format(OLD_DATE, newDish, today));
             } else {
                 if (oldDate.equals(today)) {
-                    Assert.isTrue(newDate.equals(oldDate), String.format(OLD_DISH_MESSAGE_AFTER_11, newDish, oldDate));
+                    Assert.isTrue(newDate.equals(oldDate), String.format(OLD_DISH_AFTER_11, newDish, oldDate));
                 } else {
-                    Assert.isTrue(newDate.compareTo(today) > 0, String.format(OLD_DATE_MESSAGE_AFTER_11, newDish, today));
+                    Assert.isTrue(newDate.compareTo(today) > 0, String.format(OLD_DATE_AFTER_11, newDish, today));
                 }
             }
         }
@@ -86,7 +80,10 @@ public class ValidationUtil {
         }
     }
 
+    public static void checkRestaurantId(int actual, int idFromPath) {
+        Assert.isTrue(actual == idFromPath, String.format(WRONG_RESTAURANT_ID, actual, idFromPath));
 
+    }
 
     public static Throwable getRootCause(Throwable t) {
         Throwable result = t;

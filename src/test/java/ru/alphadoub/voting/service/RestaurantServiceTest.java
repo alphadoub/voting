@@ -11,12 +11,12 @@ import ru.alphadoub.voting.util.exception.NotFoundException;
 import javax.validation.ConstraintViolationException;
 import java.util.List;
 
+import static ru.alphadoub.voting.Messages.NOT_FOUND;
 import static ru.alphadoub.voting.RestaurantTestData.*;
 import static ru.alphadoub.voting.RestaurantTestData.assertMatch;
 import static ru.alphadoub.voting.RestaurantTestData.getCreated;
 import static ru.alphadoub.voting.RestaurantTestData.getUpdated;
 import static ru.alphadoub.voting.UserTestData.*;
-import static ru.alphadoub.voting.util.ValidationUtil.NOT_FOUND_MESSAGE;
 
 
 public class RestaurantServiceTest extends AbstractServiceTest {
@@ -59,7 +59,7 @@ public class RestaurantServiceTest extends AbstractServiceTest {
     public void testGetNotFound() throws Exception {
         int wrongId = 1;
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        thrown.expectMessage(String.format(NOT_FOUND, "id=" + wrongId));
         service.get(wrongId);
     }
 
@@ -81,7 +81,7 @@ public class RestaurantServiceTest extends AbstractServiceTest {
     public void testUpdateNotFound() throws Exception {
         int wrongId = 1;
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        thrown.expectMessage(String.format(NOT_FOUND, "id=" + wrongId));
         Restaurant updated = new Restaurant(wrongId, "UPDATED Restaurant");
         service.update(updated);
     }
@@ -96,7 +96,7 @@ public class RestaurantServiceTest extends AbstractServiceTest {
     public void testDeleteNotFound() throws Exception {
         int wrongId = 1;
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        thrown.expectMessage(String.format(NOT_FOUND, "id=" + wrongId));
         service.delete(wrongId);
     }
 
@@ -119,7 +119,7 @@ public class RestaurantServiceTest extends AbstractServiceTest {
     public void testGetWithCurrentDayVotesNotFound() throws Exception {
         int wrongId = 1;
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        thrown.expectMessage(String.format(NOT_FOUND, "id=" + wrongId));
         service.getWithCurrentDayVotes(wrongId);
     }
 
@@ -155,7 +155,7 @@ public class RestaurantServiceTest extends AbstractServiceTest {
     public void testVoteNotFound() throws Exception {
         int wrongId = 1;
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        thrown.expectMessage(String.format(NOT_FOUND, "id=" + wrongId));
         service.vote(wrongId, USER2);
     }
 

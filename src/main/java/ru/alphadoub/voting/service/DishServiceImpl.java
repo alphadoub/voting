@@ -42,7 +42,7 @@ public class DishServiceImpl implements DishService {
     public Dish get(int id, int restaurantId) {
         Dish dish = checkNotFound(dishRepository.findById(id).orElse(null), id);
         int actualRestaurantId = dish.getRestaurant().getId();
-        Assert.isTrue(actualRestaurantId == restaurantId, String.format(WRONG_RESTAURANT_ID_MESSAGE, actualRestaurantId, restaurantId));
+        checkRestaurantId(actualRestaurantId, restaurantId);
         return dish;
     }
 
@@ -60,7 +60,7 @@ public class DishServiceImpl implements DishService {
     @CacheEvict(value = "dishes", allEntries = true)
     @Override
     public void delete(int id, int restaurantId) {
-        checkNotFound(dishRepository.delete(id, restaurantId), "id=" + id + " restaurantId=" + restaurantId );
+        checkNotFound(dishRepository.delete(id, restaurantId), "id=" + id + " in restaurant with id=" + restaurantId );
     }
 
     @Cacheable("dishes")

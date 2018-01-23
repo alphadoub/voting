@@ -5,18 +5,21 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.alphadoub.voting.model.Dish;
 import ru.alphadoub.voting.service.DishService;
 
+import java.time.LocalDate;
 import java.time.Month;
 
 import static java.time.LocalDate.of;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.alphadoub.voting.DishTestData.*;
+import static ru.alphadoub.voting.Messages.NOT_FOUND;
 import static ru.alphadoub.voting.RestaurantTestData.RESTAURANT1_ID;
 import static ru.alphadoub.voting.UserTestData.ADMIN;
 import static ru.alphadoub.voting.UserTestData.USER1;
@@ -122,5 +125,75 @@ public class DishRestControllerTest extends AbstractControllerTest {
         mockMvc.perform(get(URL, RESTAURANT1_ID)).andExpect(status().isUnauthorized());//get current day list
     }
 
+    @Test
+    public void test422NotFound() throws Exception {
+        int wrongId = 111111;
 
+        //get
+        mockMvc.perform(get(URL + wrongId, RESTAURANT1_ID)
+                .with(httpBasic(USER1.getEmail(), USER1.getPassword())))
+                .andExpect(status().isUnprocessableEntity())
+                .andDo(print())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value(String.format(NOT_FOUND, "id=" + wrongId)));
+
+        //delete
+        mockMvc.perform(delete(URL + wrongId, RESTAURANT1_ID)
+                .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword())))
+                .andDo(print())
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value(String.format(NOT_FOUND, "id=" + wrongId + " in restaurant with id=" + RESTAURANT1_ID)));
+
+    }
+
+    @Test
+    public void testInvalid422Update() throws Exception {
+        Dish invalid = new Dish(DISH1_ID, " ", 15, DISH1.getDate());
+        mockMvc.perform(put(URL + DISH1_ID, RESTAURANT1_ID)
+                .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jacksonObjectMapper.writeValueAsString(invalid)))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andDo(print());
+    }
+
+    @Test
+    public void testInvalid422Create() throws Exception {
+        Dish invalid = new Dish(" ", 15, LocalDate.of(2118, 12, 31));
+        mockMvc.perform(post(URL, RESTAURANT1_ID)
+                .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jacksonObjectMapper.writeValueAsString(invalid)))
+                .andExpect(status().isUnprocessableEntity())
+                .andDo(print());
+
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NEVER)
+    public void testUpdateDuplicate() throws Exception {
+        Dish notUnique = getUpdated(DISH1);
+        notUnique.setName(DISH2.getName());
+        mockMvc.perform(put(URL + DISH1_ID, RESTAURANT1_ID)
+                .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jacksonObjectMapper.writeValueAsString(notUnique)))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andDo(print());
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NEVER)
+    public void testCreateDuplicate() throws Exception {
+        Dish notUnique = new Dish(DISH1.getName(), 500, LocalDate.of(2118, 12, 31));
+        mockMvc.perform(post(URL, RESTAURANT1_ID)
+                .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jacksonObjectMapper.writeValueAsString(notUnique)))
+                .andExpect(status().isConflict())
+                .andDo(print());
+    }
 }

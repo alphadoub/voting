@@ -18,8 +18,8 @@ import static ru.alphadoub.voting.DishTestData.*;
 import static ru.alphadoub.voting.DishTestData.assertMatch;
 import static ru.alphadoub.voting.DishTestData.getCreated;
 import static ru.alphadoub.voting.DishTestData.getUpdated;
+import static ru.alphadoub.voting.Messages.*;
 import static ru.alphadoub.voting.RestaurantTestData.*;
-import static ru.alphadoub.voting.util.ValidationUtil.*;
 
 
 public class DishServiceTest extends AbstractServiceTest {
@@ -51,7 +51,7 @@ public class DishServiceTest extends AbstractServiceTest {
     public void testCreateNotFoundRestaurant() throws Exception {
         int wrongId = 1;
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        thrown.expectMessage(String.format(NOT_FOUND, "id=" + wrongId));
         Dish newDish = getCreated();
         service.create(newDish, wrongId);
     }
@@ -73,14 +73,14 @@ public class DishServiceTest extends AbstractServiceTest {
     public void testGetNotFound() throws Exception {
         int wrongId = 1;
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        thrown.expectMessage(String.format(NOT_FOUND, "id=" + wrongId));
         service.get(wrongId, RESTAURANT1_ID);
     }
 
     @Test
     public void testGetWrongRestaurantId() throws Exception {
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(String.format(WRONG_RESTAURANT_ID_MESSAGE, RESTAURANT1_ID, RESTAURANT3_ID));
+        thrown.expectMessage(String.format(WRONG_RESTAURANT_ID, RESTAURANT1_ID, RESTAURANT3_ID));
         service.get(DISH1_ID, RESTAURANT3_ID);
     }
 
@@ -102,7 +102,7 @@ public class DishServiceTest extends AbstractServiceTest {
     public void testUpdateNotFound() throws Exception {
         int wrongId = 1;
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        thrown.expectMessage(String.format(NOT_FOUND, "id=" + wrongId));
         Dish updated = getUpdated(DISH1);
         updated.setId(wrongId);
         service.update(updated, RESTAURANT1_ID);
@@ -111,7 +111,7 @@ public class DishServiceTest extends AbstractServiceTest {
     @Test
     public void testUpdateWrongRestaurantId() throws Exception {
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(String.format(WRONG_RESTAURANT_ID_MESSAGE, RESTAURANT1_ID, RESTAURANT3_ID));
+        thrown.expectMessage(String.format(WRONG_RESTAURANT_ID, RESTAURANT1_ID, RESTAURANT3_ID));
         Dish updated = getUpdated(DISH1);
         service.update(updated, RESTAURANT3_ID);
     }
@@ -121,7 +121,7 @@ public class DishServiceTest extends AbstractServiceTest {
         thrown.expect(IllegalArgumentException.class);
         Dish updated = getUpdated(DISH4);
         updated.setDate(now());
-        thrown.expectMessage(String.format(OLD_DISH_MESSAGE, updated, DISH4.getDate()));
+        thrown.expectMessage(String.format(OLD_DISH, updated, DISH4.getDate()));
         service.update(updated, RESTAURANT1_ID);
     }
 
@@ -133,10 +133,10 @@ public class DishServiceTest extends AbstractServiceTest {
         LocalTime now = LocalTime.now();
         if (now.compareTo(LocalTime.of(11,0)) < 0) {
             updated.setDate(of(2017, Month.DECEMBER, 31));
-            thrown.expectMessage(String.format(OLD_DATE_MESSAGE, updated, LocalDate.now()));
+            thrown.expectMessage(String.format(OLD_DATE, updated, LocalDate.now()));
         } else {
             updated.setDate(of(2111, Month.DECEMBER, 31));
-            thrown.expectMessage(String.format(OLD_DISH_MESSAGE_AFTER_11, updated, DISH1.getDate()));
+            thrown.expectMessage(String.format(OLD_DISH_AFTER_11, updated, DISH1.getDate()));
         }
         service.update(updated, RESTAURANT1_ID);
     }
@@ -149,10 +149,10 @@ public class DishServiceTest extends AbstractServiceTest {
         LocalTime now = LocalTime.now();
         if (now.compareTo(LocalTime.of(11,0)) < 0) {
             updated.setDate(of(2017, Month.DECEMBER, 31));
-            thrown.expectMessage(String.format(OLD_DATE_MESSAGE, updated, LocalDate.now()));
+            thrown.expectMessage(String.format(OLD_DATE, updated, LocalDate.now()));
         } else {
             updated.setDate(LocalDate.now());
-            thrown.expectMessage(String.format(OLD_DATE_MESSAGE_AFTER_11, updated, LocalDate.now()));
+            thrown.expectMessage(String.format(OLD_DATE_AFTER_11, updated, LocalDate.now()));
         }
         service.update(updated, RESTAURANT1_ID);
     }
@@ -166,7 +166,7 @@ public class DishServiceTest extends AbstractServiceTest {
     @Test
     public void testDeleteNotFound() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + DISH1_ID + " restaurantId=" + RESTAURANT2_ID));
+        thrown.expectMessage(String.format(NOT_FOUND, "id=" + DISH1_ID + " in restaurant with id=" + RESTAURANT2_ID));
         service.delete(DISH1_ID, RESTAURANT2_ID);
     }
 
@@ -186,7 +186,7 @@ public class DishServiceTest extends AbstractServiceTest {
     public void testGetCurrentDayListNotFound() throws Exception {
         int wrongId = 1;
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format(NOT_FOUND_MESSAGE, "id=" + wrongId));
+        thrown.expectMessage(String.format(NOT_FOUND, "id=" + wrongId));
         service.getCurrentDayList(wrongId);
     }
 

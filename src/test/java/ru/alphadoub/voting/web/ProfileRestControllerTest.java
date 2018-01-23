@@ -3,6 +3,8 @@ package ru.alphadoub.voting.web;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.alphadoub.voting.model.User;
 import ru.alphadoub.voting.service.UserService;
 import ru.alphadoub.voting.to.UserTo;
@@ -41,6 +43,31 @@ public class ProfileRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print());
         assertMatch(service.get(USER1_ID), UserUtil.updateFromTo(new User(USER1), updated));
+    }
+
+    @Test
+    public void testInvalidUpdate() throws Exception {
+        UserTo updated = new UserTo(USER1_ID, " ", "updated@@@gmail.com", " ");
+        mockMvc.perform(put(URL)
+                .with(httpBasic(USER1.getEmail(), USER1.getPassword()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jacksonObjectMapper.writeValueAsString(updated)))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andDo(print());
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NEVER)
+    public void testUpdateDuplicate() throws Exception {
+        UserTo updated = new UserTo(USER1_ID, USER1.getName(), USER2.getEmail(), USER1.getPassword());
+        mockMvc.perform(put(URL)
+                .with(httpBasic(USER1.getEmail(), USER1.getPassword()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jacksonObjectMapper.writeValueAsString(updated)))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andDo(print());
     }
 
     @Test
