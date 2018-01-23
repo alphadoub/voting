@@ -5,13 +5,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ru.alphadoub.voting.ValidationGroups;
 import ru.alphadoub.voting.model.Dish;
 import ru.alphadoub.voting.service.DishService;
 
+import java.net.URI;
 import java.util.List;
 
 import static ru.alphadoub.voting.util.ValidationUtil.*;
@@ -33,12 +36,18 @@ public class DishRestController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Dish create(@Validated(ValidationGroups.Rest.class) @RequestBody Dish dish,
+    public ResponseEntity<Dish> create(@Validated(ValidationGroups.Rest.class) @RequestBody Dish dish,
                        @PathVariable("restaurant_id") int restaurantId) {
         log.info("create {} in restaurant with id={}", dish, restaurantId);
         checkIsNew(dish);
         checkWrongDateForCreate(dish);
-        return service.create(dish, restaurantId);
+        Dish created = service.create(dish, restaurantId);
+
+        URI uriOfNewResource = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path(URL + "/{id}")
+                .buildAndExpand(restaurantId, created.getId()).toUri();
+
+        return ResponseEntity.created(uriOfNewResource).body(created);
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

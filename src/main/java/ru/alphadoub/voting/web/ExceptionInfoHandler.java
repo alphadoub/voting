@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.alphadoub.voting.util.ValidationUtil;
 import ru.alphadoub.voting.util.exception.ExceptionInfo;
 import ru.alphadoub.voting.util.exception.NotFoundException;
+import ru.alphadoub.voting.util.exception.VotingTimeConstraintException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
@@ -42,7 +43,7 @@ public class ExceptionInfoHandler {
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    @ExceptionHandler(AccessDeniedException.class)
+    @ExceptionHandler({AccessDeniedException.class, VotingTimeConstraintException.class})
     public ExceptionInfo handleUnauthorized(HttpServletRequest request, AccessDeniedException e) {
         return logAndGetExceptionInfo(request, e, false, e.getMessage());
     }
@@ -95,6 +96,6 @@ public class ExceptionInfoHandler {
             log.warn("{} at request  {}: {}", e, req.getRequestURL(), rootCause.toString());
         }
 
-        return new ExceptionInfo(req.getRequestURL(), e == rootCause ? message : rootCause.getMessage());
+        return new ExceptionInfo(req.getRequestURL(), e == rootCause ? message : rootCause.toString());
     }
 }

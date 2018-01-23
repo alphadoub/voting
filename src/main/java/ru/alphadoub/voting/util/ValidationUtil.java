@@ -5,11 +5,12 @@ import ru.alphadoub.voting.HasId;
 import ru.alphadoub.voting.model.BaseEntity;
 import ru.alphadoub.voting.model.Dish;
 import ru.alphadoub.voting.util.exception.NotFoundException;
+import ru.alphadoub.voting.util.exception.VotingTimeConstraintException;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
-import static java.lang.String.format;
+import static java.time.LocalTime.now;
+import static java.time.LocalTime.of;
 import static ru.alphadoub.voting.Messages.*;
 
 public class ValidationUtil {
@@ -21,7 +22,7 @@ public class ValidationUtil {
     }
 
     public static <T> T checkNotFound(T object, String arg) {
-        if (object == null) throw new NotFoundException(format(NOT_FOUND, arg));
+        if (object == null) throw new NotFoundException(arg);
         return object;
     }
 
@@ -30,11 +31,11 @@ public class ValidationUtil {
     }
 
     public static void checkNotFound(int numberOfChanges, String arg) {
-        if (numberOfChanges == 0) throw new NotFoundException(format(NOT_FOUND, arg));
+        if (numberOfChanges == 0) throw new NotFoundException(arg);
     }
 
     public static void checkWrongDateForCreate(Dish dish) {
-        if (LocalTime.now().compareTo(LocalTime.of(11, 0)) < 0) {
+        if (now().compareTo(of(11, 0)) < 0) {
             Assert.isTrue(dish.getDate().compareTo(LocalDate.now()) >= 0, String.format(OLD_DATE, dish, LocalDate.now()));
         }
         else {
@@ -50,7 +51,7 @@ public class ValidationUtil {
         if (oldDate.compareTo(today) < 0) {
             Assert.isTrue(newDate.equals(oldDate), String.format(OLD_DISH, newDish, oldDate));
         } else {
-            if (LocalTime.now().compareTo(LocalTime.of(11, 0)) < 0) {
+            if (now().compareTo(of(11, 0)) < 0) {
                 Assert.isTrue(newDate.compareTo(today) >= 0, String.format(OLD_DATE, newDish, today));
             } else {
                 if (oldDate.equals(today)) {
@@ -74,9 +75,9 @@ public class ValidationUtil {
         }
     }
 
-    public static void checkVotingTime() {
-        if (LocalTime.now().compareTo(LocalTime.of(11, 0)) > 0) {
-            throw new UnsupportedOperationException("You can not vote after 11:00");
+    public static void checkVotingTime(int constaintHour) {
+        if (now().compareTo(of(constaintHour, 0)) > 0) {
+            throw new VotingTimeConstraintException(of(constaintHour, 0).toString());
         }
     }
 

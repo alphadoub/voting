@@ -1,6 +1,5 @@
 package ru.alphadoub.voting.web;
 
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,14 +94,9 @@ public class RestaurantRestControllerTest extends AbstractControllerTest {
 
     @Test
     public void testVote() throws Exception {
-        /*
-               * Пока не добавлена обработка исключений в случае, если текущее время > 11:00, пропустим тест
-               * После добавления обработки исключений сделаем вариативность ожидания статуса в зависимости от текущего времени
-               */
-        Assume.assumeTrue(now().compareTo(of(11, 0)) < 0);
         mockMvc.perform(post(URL + RESTAURANT1_ID + "/vote")
                 .with(httpBasic(USER1.getEmail(), USER1.getPassword())))
-                .andExpect(status().isOk())
+                .andExpect(now().compareTo(of(11, 0)) < 0 ? status().isOk() : status().isForbidden())
                 .andDo(print());
     }
 
@@ -178,7 +172,6 @@ public class RestaurantRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message").value(String.format(NOT_FOUND, "id=" + wrongId)));
-
     }
 
     @Test
@@ -229,8 +222,4 @@ public class RestaurantRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isConflict())
                 .andDo(print());
     }
-
-
-
-
 }

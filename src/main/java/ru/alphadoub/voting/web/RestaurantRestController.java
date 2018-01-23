@@ -5,16 +5,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ru.alphadoub.voting.AuthorizedUser;
 import ru.alphadoub.voting.ValidationGroups;
 import ru.alphadoub.voting.model.Restaurant;
 import ru.alphadoub.voting.service.RestaurantService;
 import ru.alphadoub.voting.to.RestaurantWithVotes;
 
+import java.net.URI;
 import java.util.List;
 
 import static ru.alphadoub.voting.util.ValidationUtil.*;
@@ -36,10 +39,15 @@ public class RestaurantRestController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Restaurant create(@Validated(ValidationGroups.Rest.class) @RequestBody Restaurant restaurant) {
+    public ResponseEntity<Restaurant> create(@Validated(ValidationGroups.Rest.class) @RequestBody Restaurant restaurant) {
         log.info("create {}", restaurant);
         checkIsNew(restaurant);
-        return service.create(restaurant);
+        Restaurant created = service.create(restaurant);
+        URI uriOfNewResource = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path(URL + "/{id}")
+                .buildAndExpand(created.getId()).toUri();
+
+        return ResponseEntity.created(uriOfNewResource).body(created);
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -73,7 +81,7 @@ public class RestaurantRestController {
     @PostMapping(value = "/{id}/vote")
     public void vote(@PathVariable("id") int id, @AuthenticationPrincipal AuthorizedUser authorizedUser) {
         log.info("vote for restaurant with id={}", id);
-        checkVotingTime();
+        checkVotingTime(11);
         service.vote(id, authorizedUser.getUser());
     }
 

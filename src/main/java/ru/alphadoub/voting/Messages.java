@@ -12,4 +12,5 @@ public class Messages {
     public static final String NOT_UNIQUE_DISH = "Dish with this date and name already exists in this restaurant";
     public static final String NOT_UNIQUE_EMAIL = "User with this email already exists";
     public static final String DATA_ERROR = "Insert or update data results in violation of an integrity constraint";
+    public static final String CAN_NOT_VOTE = "You can not vote after %s";
 }
