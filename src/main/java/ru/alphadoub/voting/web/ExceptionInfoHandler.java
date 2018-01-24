@@ -6,11 +6,18 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import ru.alphadoub.voting.util.ValidationUtil;
 import ru.alphadoub.voting.util.exception.ExceptionInfo;
 import ru.alphadoub.voting.util.exception.NotFoundException;
@@ -21,7 +28,7 @@ import java.util.*;
 
 import static ru.alphadoub.voting.Messages.*;
 
-@ControllerAdvice(annotations = RestController.class)
+@ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE + 5)
 @ResponseBody
 public class ExceptionInfoHandler {
@@ -36,21 +43,39 @@ public class ExceptionInfoHandler {
                 }
             });
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ExceptionInfo handleNoHandler(HttpServletRequest request, NoHandlerFoundException e) {
+        return logAndGetExceptionInfo(request, e, false, e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ExceptionInfo handleNoSupported(HttpServletRequest request, HttpRequestMethodNotSupportedException e) {
+        return logAndGetExceptionInfo(request, e, false, e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class})
+    public ExceptionInfo handleParsingError(HttpServletRequest request, Exception e) {
+        return logAndGetExceptionInfo(request, e, false, e.getMessage());
+    }
+
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ExceptionHandler(NotFoundException.class)
-    public ExceptionInfo handleNotFoundException(HttpServletRequest request, Exception e) {
+    public ExceptionInfo handleNotFoundException(HttpServletRequest request, NotFoundException e) {
         return logAndGetExceptionInfo(request, e, false, e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler({AccessDeniedException.class, VotingTimeConstraintException.class})
-    public ExceptionInfo handleUnauthorized(HttpServletRequest request, AccessDeniedException e) {
+    public ExceptionInfo handleForbidden(HttpServletRequest request, Exception e) {
         return logAndGetExceptionInfo(request, e, false, e.getMessage());
     }
 
     @ResponseStatus(value = HttpStatus.CONFLICT)
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ExceptionInfo handle(HttpServletRequest request, DataIntegrityViolationException e) {
+    public ExceptionInfo handleIntegrityViolationException(HttpServletRequest request, DataIntegrityViolationException e) {
         String rootMsg = ValidationUtil.getRootCause(e).getMessage();
         if (rootMsg != null) {
             String lowerCaseMsg = rootMsg.toLowerCase();

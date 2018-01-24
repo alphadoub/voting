@@ -6,7 +6,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.Range;
-import ru.alphadoub.voting.ValidationGroups;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -29,7 +28,6 @@ public class Dish extends BaseEntity {
     @JoinColumn(name = "restaurant_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
-    @NotNull(groups = ValidationGroups.Persist.class)
     private Restaurant restaurant;
 
     public Dish() {

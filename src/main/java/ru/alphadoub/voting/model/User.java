@@ -3,7 +3,9 @@ package ru.alphadoub.voting.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.util.CollectionUtils;
+import ru.alphadoub.voting.ValidationGroups;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -18,7 +20,7 @@ public class User extends BaseEntity {
     @Email
     @NotBlank
     @Size(max = 100)
-    /*@SafeHtml(groups = ValidationGroups.Rest.class)*/
+    @SafeHtml(groups = ValidationGroups.Rest.class)
     private String email;
 
     @Column(name = "password", nullable = false)

@@ -222,4 +222,15 @@ public class RestaurantRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isConflict())
                 .andDo(print());
     }
+
+    @Test
+    public void testUnsafeHtmlUpdate() throws Exception {
+        Restaurant updated = new Restaurant(RESTAURANT1_ID, "<script>alert(123)</script>");
+        mockMvc.perform(put(URL + RESTAURANT1_ID)
+                .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jacksonObjectMapper.writeValueAsString(updated)))
+                .andExpect(status().isUnprocessableEntity())
+                .andDo(print());
+    }
 }

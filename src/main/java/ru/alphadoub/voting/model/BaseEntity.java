@@ -1,7 +1,9 @@
 package ru.alphadoub.voting.model;
 
 import org.hibernate.Hibernate;
+import org.hibernate.validator.constraints.SafeHtml;
 import ru.alphadoub.voting.HasId;
+import ru.alphadoub.voting.ValidationGroups;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -18,7 +20,7 @@ public abstract class BaseEntity implements HasId {
     @Column(name = "name", nullable = false)
     @NotBlank
     @Size(min = 2, max = 100)
-    //@SafeHtml(groups = {ValidationGroups.Rest.class})
+    @SafeHtml(groups = {ValidationGroups.Rest.class})
     private String name;
 
     protected BaseEntity() {
