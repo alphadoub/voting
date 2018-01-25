@@ -55,4 +55,8 @@ public class DishTestData {
     public static Dish getUpdated(Dish dish) {
         return new Dish(dish.getId(), "UPDATED dish", 650, dish.getDate());
     }
+
+    public static String getJson(Dish dish) {
+        return String.format("{\"id\":%d,\"name\":\"%s\",\"price\":%d,\"date\":\"%s\"}",dish.getId(), dish.getName(), dish.getPrice(), dish.getDate());
+    }
 }

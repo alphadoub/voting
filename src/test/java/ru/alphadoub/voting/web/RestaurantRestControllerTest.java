@@ -41,6 +41,7 @@ public class RestaurantRestControllerTest extends AbstractControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jacksonObjectMapper.writeValueAsString(newRestaurant)))
                 .andExpect(status().isCreated())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andDo(print());
 
         Restaurant returned = jacksonObjectMapper.readValue(getContent(action), Restaurant.class);
@@ -51,13 +52,13 @@ public class RestaurantRestControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    public void testGet() throws Exception {
+    public void testGetWithMenu() throws Exception {
         mockMvc.perform(get(URL + RESTAURANT1_ID)
                 .with(httpBasic(USER1.getEmail(), USER1.getPassword())))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(jacksonObjectMapper.writeValueAsString(RESTAURANT1)));
+                .andExpect(content().json(RESTAURANT1_WITH_MENU_JSON, true));
     }
 
     @Test
@@ -90,6 +91,17 @@ public class RestaurantRestControllerTest extends AbstractControllerTest {
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(jacksonObjectMapper.writeValueAsString(RESTAURANTS), true));
+    }
+
+
+    @Test
+    public void testGetAllWithMenu() throws Exception {
+        mockMvc.perform(get(URL + "/with_menu")
+                .with(httpBasic(USER1.getEmail(), USER1.getPassword())))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(RESTAURANTS_WITH_MENU_JSON, true));
     }
 
     @Test

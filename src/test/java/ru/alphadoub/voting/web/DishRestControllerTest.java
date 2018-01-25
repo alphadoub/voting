@@ -42,21 +42,22 @@ public class DishRestControllerTest extends AbstractControllerTest {
         ResultActions action = mockMvc.perform(post(URL, RESTAURANT1_ID)
                 .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword()))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jacksonObjectMapper.writeValueAsString(newDish)))
+                .content(getJson(newDish)))
                 .andExpect(status().isCreated())
                 .andDo(print());
 
         Dish returned = jacksonObjectMapper.readValue(getContent(action), Dish.class);
+        returned.setDate(newDish.getDate());
         newDish.setId(returned.getId());
 
         assertMatch(returned, newDish);
-        assertMatch(service.getListByDate(RESTAURANT1_ID, of(2118, Month.DECEMBER, 31)), DISH9, DISH7, newDish, DISH8);
+        assertMatch(service.getRestaurantMenuByDate(RESTAURANT1_ID, of(2118, Month.DECEMBER, 31)), DISH9, DISH7, newDish, DISH8);
     }
 
     @Test
     public void testGet() throws Exception {
         mockMvc.perform(get(URL + DISH1_ID, RESTAURANT1_ID)
-                .with(httpBasic(USER1.getEmail(), USER1.getPassword())))
+                .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword())))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -69,7 +70,7 @@ public class DishRestControllerTest extends AbstractControllerTest {
         mockMvc.perform(put(URL + DISH1_ID, RESTAURANT1_ID)
                 .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword()))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jacksonObjectMapper.writeValueAsString(updated)))
+                .content(getJson(updated)))
                 .andExpect(status().isOk())
                 .andDo(print());
 
@@ -82,11 +83,11 @@ public class DishRestControllerTest extends AbstractControllerTest {
                 .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword())))
                 .andDo(print())
                 .andExpect(status().isNoContent());
-        assertMatch(service.getCurrentDayList(RESTAURANT1_ID), DISH3, DISH2);
+        assertMatch(service.getTodayRestaurantMenu(RESTAURANT1_ID), DISH3, DISH2);
     }
 
     @Test
-    public void testGetCurrentDayList() throws Exception {
+    public void testGetTodayRestaurantMenu() throws Exception {
         mockMvc.perform(get(URL, RESTAURANT1_ID)
                 .with(httpBasic(USER1.getEmail(), USER1.getPassword())))
                 .andExpect(status().isOk())
@@ -102,7 +103,7 @@ public class DishRestControllerTest extends AbstractControllerTest {
         mockMvc.perform(post(URL, RESTAURANT1_ID)
                 .with(httpBasic(USER1.getEmail(), USER1.getPassword()))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jacksonObjectMapper.writeValueAsString(newDish)))
+                .content(getJson(newDish)))
                 .andExpect(status().isForbidden());
 
         //update
@@ -110,7 +111,7 @@ public class DishRestControllerTest extends AbstractControllerTest {
         mockMvc.perform(put(URL + DISH1_ID, RESTAURANT1_ID)
                 .with(httpBasic(USER1.getEmail(), USER1.getPassword()))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jacksonObjectMapper.writeValueAsString(updated)))
+                .content(getJson(updated)))
                 .andExpect(status().isForbidden());
 
         //delete
@@ -131,7 +132,7 @@ public class DishRestControllerTest extends AbstractControllerTest {
 
         //get
         mockMvc.perform(get(URL + wrongId, RESTAURANT1_ID)
-                .with(httpBasic(USER1.getEmail(), USER1.getPassword())))
+                .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword())))
                 .andExpect(status().isUnprocessableEntity())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -165,8 +166,9 @@ public class DishRestControllerTest extends AbstractControllerTest {
         mockMvc.perform(post(URL, RESTAURANT1_ID)
                 .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword()))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jacksonObjectMapper.writeValueAsString(invalid)))
+                .content(getJson(invalid)))
                 .andExpect(status().isUnprocessableEntity())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andDo(print());
 
     }
@@ -179,7 +181,7 @@ public class DishRestControllerTest extends AbstractControllerTest {
         mockMvc.perform(put(URL + DISH1_ID, RESTAURANT1_ID)
                 .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword()))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jacksonObjectMapper.writeValueAsString(notUnique)))
+                .content(getJson(notUnique)))
                 .andExpect(status().isConflict())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andDo(print());
@@ -192,8 +194,9 @@ public class DishRestControllerTest extends AbstractControllerTest {
         mockMvc.perform(post(URL, RESTAURANT1_ID)
                 .with(httpBasic(ADMIN.getEmail(), ADMIN.getPassword()))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jacksonObjectMapper.writeValueAsString(notUnique)))
+                .content(getJson(notUnique)))
                 .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andDo(print());
     }
 }

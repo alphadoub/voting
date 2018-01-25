@@ -37,7 +37,7 @@ public class DishServiceTest extends AbstractServiceTest {
         Dish newDish = getCreated();
         Dish created = service.create(newDish, RESTAURANT1_ID);
         newDish.setId(created.getId());
-        assertMatch(service.getCurrentDayList(RESTAURANT1_ID), newDish, DISH3, DISH1, DISH2);
+        assertMatch(service.getTodayRestaurantMenu(RESTAURANT1_ID), newDish, DISH3, DISH1, DISH2);
     }
 
     @Test
@@ -160,7 +160,7 @@ public class DishServiceTest extends AbstractServiceTest {
     @Test
     public void testDelete() throws Exception {
         service.delete(DISH1_ID, RESTAURANT1_ID);
-        assertMatch(service.getCurrentDayList(RESTAURANT1_ID), DISH3, DISH2);
+        assertMatch(service.getTodayRestaurantMenu(RESTAURANT1_ID), DISH3, DISH2);
     }
 
     @Test
@@ -171,23 +171,28 @@ public class DishServiceTest extends AbstractServiceTest {
     }
 
     @Test
-    public void testGetCurrentDayList() throws Exception {
-        assertMatch(service.getCurrentDayList(RESTAURANT1_ID), RESTAURANT1_MENU);
-        assertMatch(service.getCurrentDayList(RESTAURANT2_ID), RESTAURANT2_MENU);
-        assertMatch(service.getCurrentDayList(RESTAURANT3_ID), RESTAURANT3_MENU);
+    public void testGetTodayRestaurantMenu() throws Exception {
+        assertMatch(service.getTodayRestaurantMenu(RESTAURANT1_ID), RESTAURANT1_MENU);
+        assertMatch(service.getTodayRestaurantMenu(RESTAURANT2_ID), RESTAURANT2_MENU);
+        assertMatch(service.getTodayRestaurantMenu(RESTAURANT3_ID), RESTAURANT3_MENU);
     }
 
     @Test
-    public void testGetListByDate() throws Exception {
-        assertMatch(service.getListByDate(RESTAURANT1_ID, of(2118, Month.DECEMBER, 31)), DISH9, DISH7, DISH8);
+    public void testGetRestaurantMenuByDate() throws Exception {
+        assertMatch(service.getRestaurantMenuByDate(RESTAURANT1_ID, of(2118, Month.DECEMBER, 31)), DISH9, DISH7, DISH8);
     }
 
     @Test
-    public void testGetCurrentDayListNotFound() throws Exception {
+    public void testGetTodayRestaurantMenuNotFound() throws Exception {
         int wrongId = 1;
         thrown.expect(NotFoundException.class);
         thrown.expectMessage(String.format(NOT_FOUND, "id=" + wrongId));
-        service.getCurrentDayList(wrongId);
+        service.getTodayRestaurantMenu(wrongId);
+    }
+
+    @Test
+    public void testGetAllByDate() throws Exception {
+        assertMatch(service.getAllByDate(LocalDate.now()), DISH3, DISH1, DISH2, DISH12, DISH10, DISH11, DISH15, DISH13, DISH14);
     }
 
     @Test

@@ -1,14 +1,16 @@
 package ru.alphadoub.voting.service;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import ru.alphadoub.voting.model.Restaurant;
-import ru.alphadoub.voting.to.RestaurantWithVotes;
+import ru.alphadoub.voting.repository.VoteRepository;
 import ru.alphadoub.voting.util.exception.NotFoundException;
 
 import javax.validation.ConstraintViolationException;
+import java.time.LocalDate;
 import java.util.List;
 
 import static ru.alphadoub.voting.Messages.NOT_FOUND;
@@ -22,6 +24,9 @@ import static ru.alphadoub.voting.UserTestData.*;
 public class RestaurantServiceTest extends AbstractServiceTest {
     @Autowired
     RestaurantService service;
+
+    @Autowired
+    VoteRepository voteRepository;
 
     @Before
     public void clearSpringCache() throws Exception {
@@ -107,48 +112,29 @@ public class RestaurantServiceTest extends AbstractServiceTest {
     }
 
     @Test
-    public void testGetWithCurrentDayVotes() throws Exception {
-        RestaurantWithVotes restaurant2WithVotes = service.getWithCurrentDayVotes(RESTAURANT2_ID);
-        assertMatchWithVotes(restaurant2WithVotes, RESTAURANT2_WITH_VOTES);
-
-        RestaurantWithVotes restaurant1WithVotes = service.getWithCurrentDayVotes(RESTAURANT1_ID);
-        assertMatchWithVotes(restaurant1WithVotes, RESTAURANT1_WITH_VOTES);
-    }
-
-    @Test
-    public void testGetWithCurrentDayVotesNotFound() throws Exception {
-        int wrongId = 1;
-        thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format(NOT_FOUND, "id=" + wrongId));
-        service.getWithCurrentDayVotes(wrongId);
-    }
-
-    @Test
-    public void testGetAllWithCurrentDayVotes() throws Exception {
-        List<RestaurantWithVotes> all = service.getAllWithCurrentDayVotes();
-        assertMatchWithVotes(all, RESTAURANT1_WITH_VOTES, RESTAURANT3_WITH_VOTES, RESTAURANT2_WITH_VOTES);
-    }
-
-    @Test
     public void testVote() throws Exception {
+        long countOfVotes = voteRepository.countByRestaurantIdAndDate(RESTAURANT2_ID, LocalDate.now());
         service.vote(RESTAURANT2_ID, USER2);
-        assertMatchWithVotes(service.getWithCurrentDayVotes(RESTAURANT2_ID), getPlusOneVote(RESTAURANT2_WITH_VOTES));
+        Assert.assertEquals(countOfVotes + 1, voteRepository.countByRestaurantIdAndDate(RESTAURANT2_ID, LocalDate.now()));;
 
     }
 
     @Test
     public void testRepeatVote() throws Exception {
+        long countOfVotes = voteRepository.countByRestaurantIdAndDate(RESTAURANT1_ID, LocalDate.now());
         service.vote(RESTAURANT1_ID, ADMIN);
         service.vote(RESTAURANT1_ID, ADMIN);
-        assertMatchWithVotes(service.getWithCurrentDayVotes(RESTAURANT1_ID), RESTAURANT1_WITH_VOTES);
+        Assert.assertEquals(countOfVotes, voteRepository.countByRestaurantIdAndDate(RESTAURANT1_ID, LocalDate.now()));
 
     }
 
     @Test
     public void testChangeVote() throws Exception {
+        long countOfVotesOfR1 = voteRepository.countByRestaurantIdAndDate(RESTAURANT1_ID, LocalDate.now());
+        long countOfVotesOfR3 = voteRepository.countByRestaurantIdAndDate(RESTAURANT3_ID, LocalDate.now());
         service.vote(RESTAURANT3_ID, USER3);
-        assertMatchWithVotes(service.getWithCurrentDayVotes(RESTAURANT3_ID), getPlusOneVote(RESTAURANT3_WITH_VOTES));
-        assertMatchWithVotes(service.getWithCurrentDayVotes(RESTAURANT1_ID), getMinusOneVote(RESTAURANT1_WITH_VOTES));
+        Assert.assertEquals(countOfVotesOfR1 - 1, voteRepository.countByRestaurantIdAndDate(RESTAURANT1_ID, LocalDate.now()));
+        Assert.assertEquals(countOfVotesOfR3 + 1, voteRepository.countByRestaurantIdAndDate(RESTAURANT3_ID, LocalDate.now()));
     }
 
     @Test
