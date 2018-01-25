@@ -2,7 +2,7 @@ package ru.alphadoub.voting.service;
 
 import ru.alphadoub.voting.model.Restaurant;
 import ru.alphadoub.voting.model.User;
-import ru.alphadoub.voting.to.RestaurantWithVotes;
+import ru.alphadoub.voting.model.Vote;
 
 import java.util.List;
 
@@ -17,9 +17,5 @@ public interface RestaurantService {
 
     List<Restaurant> getAll();
 
-    void vote(int restaurantId, User user);
-
-    RestaurantWithVotes getWithCurrentDayVotes(int id);
-
-    List<RestaurantWithVotes> getAllWithCurrentDayVotes();
+    Vote vote(int restaurantId, User user);
 }

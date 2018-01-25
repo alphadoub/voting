@@ -14,7 +14,9 @@ public interface DishService {
 
     void delete(int id, int restaurantId);
 
-    List<Dish> getCurrentDayList(int restaurantId);
+    List<Dish> getTodayRestaurantMenu(int restaurantId);
 
-    List<Dish> getListByDate(int restaurantId, LocalDate date);
+    List<Dish> getRestaurantMenuByDate(int restaurantId, LocalDate date);
+
+    List<Dish> getAllByDate(LocalDate date);
 }

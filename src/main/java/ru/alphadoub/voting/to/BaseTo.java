@@ -1,6 +1,8 @@
 package ru.alphadoub.voting.to;
 
+import org.hibernate.validator.constraints.SafeHtml;
 import ru.alphadoub.voting.HasId;
+import ru.alphadoub.voting.ValidationGroups;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -10,7 +12,7 @@ public abstract class BaseTo implements HasId {
 
     @NotBlank
     @Size(min = 2, max = 100)
-    //@SafeHtml(groups = {ValidationGroups.Rest.class})
+    @SafeHtml(groups = {ValidationGroups.Rest.class})
     private String name;
 
     public BaseTo() {

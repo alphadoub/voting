@@ -1,6 +1,7 @@
 package ru.alphadoub.voting.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OnDelete;
@@ -22,6 +23,7 @@ public class Dish extends BaseEntity {
 
     @Column(name = "date", nullable = false)
     @NotNull
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)

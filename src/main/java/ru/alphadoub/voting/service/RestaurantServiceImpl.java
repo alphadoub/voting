@@ -2,6 +2,7 @@ package ru.alphadoub.voting.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -10,11 +11,7 @@ import ru.alphadoub.voting.model.User;
 import ru.alphadoub.voting.model.Vote;
 import ru.alphadoub.voting.repository.RestaurantRepository;
 import ru.alphadoub.voting.repository.VoteRepository;
-import ru.alphadoub.voting.to.RestaurantWithVotes;
-import ru.alphadoub.voting.util.RestaurantUtil;
 
-import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 
 import static ru.alphadoub.voting.util.ValidationUtil.checkNotFound;
@@ -58,12 +55,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         checkNotFound(restaurantRepository.delete(id), id);
     }
 
-    /*
-         * Метод вохвращает кэшируемвый результат, но аннотация кэширования
-         * перенесена в слой репозитория для обеспечения возможности использования
-         * результата кэширования внутри текущего класса. Как альтернатива создания
-         * дополнительно проксиобъекта сервиса в классе сервиса
-         */
+    @Cacheable("restaurants")
     @Override
     public List<Restaurant> getAll() {
         return restaurantRepository.getAll();
@@ -71,30 +63,11 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     @Transactional
-    public RestaurantWithVotes getWithCurrentDayVotes(int id) {
-        Restaurant restaurant = get(id);
-        long countOfVotes = voteRepository.countByRestaurantIdAndDate(id, LocalDate.now());
-        return RestaurantUtil.getWithVotes(restaurant, countOfVotes);
-    }
-
-    @Override
-    @Transactional
-    public List<RestaurantWithVotes> getAllWithCurrentDayVotes() {
-        List<Restaurant> restaurants = getAll();
-        if (restaurants.isEmpty()) {
-            return Collections.emptyList();
-        }
-        List<Vote> votes = voteRepository.getAllByDate(LocalDate.now());
-        return RestaurantUtil.getWithVotes(restaurants, votes);
-    }
-
-    @Override
-    @Transactional
-    public void vote(int id, User user) {
+    public Vote vote(int id, User user) {
         Assert.notNull(user, "user must not be null");
         Restaurant restaurant = get(id);
         Vote vote = new Vote(user, restaurant);
-        voteRepository.save(vote);
+        return voteRepository.save(vote);
     }
 }
 

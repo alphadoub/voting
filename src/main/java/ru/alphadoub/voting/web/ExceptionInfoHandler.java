@@ -46,31 +46,31 @@ public class ExceptionInfoHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NoHandlerFoundException.class)
     public ExceptionInfo handleNoHandler(HttpServletRequest request, NoHandlerFoundException e) {
-        return logAndGetExceptionInfo(request, e, false, e.getMessage());
+        return logAndGetExceptionInfo(request, e, false);
     }
 
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ExceptionInfo handleNoSupported(HttpServletRequest request, HttpRequestMethodNotSupportedException e) {
-        return logAndGetExceptionInfo(request, e, false, e.getMessage());
+        return logAndGetExceptionInfo(request, e, false);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class})
     public ExceptionInfo handleParsingError(HttpServletRequest request, Exception e) {
-        return logAndGetExceptionInfo(request, e, false, e.getMessage());
+        return logAndGetExceptionInfo(request, e, false);
     }
 
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ExceptionHandler(NotFoundException.class)
     public ExceptionInfo handleNotFoundException(HttpServletRequest request, NotFoundException e) {
-        return logAndGetExceptionInfo(request, e, false, e.getMessage());
+        return logAndGetExceptionInfo(request, e, false);
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler({AccessDeniedException.class, VotingTimeConstraintException.class})
     public ExceptionInfo handleForbidden(HttpServletRequest request, Exception e) {
-        return logAndGetExceptionInfo(request, e, false, e.getMessage());
+        return logAndGetExceptionInfo(request, e, false);
     }
 
     @ResponseStatus(value = HttpStatus.CONFLICT)
@@ -110,7 +110,7 @@ public class ExceptionInfoHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public ExceptionInfo handle(HttpServletRequest request, Exception e) {
-        return logAndGetExceptionInfo(request, e, true, e.getMessage());
+        return logAndGetExceptionInfo(request, e, true);
     }
 
     private ExceptionInfo logAndGetExceptionInfo(HttpServletRequest req, Throwable e, boolean logException, String message) {
@@ -121,6 +121,9 @@ public class ExceptionInfoHandler {
             log.warn("{} at request  {}: {}", e, req.getRequestURL(), rootCause.toString());
         }
 
-        return new ExceptionInfo(req.getRequestURL(), e == rootCause ? message : rootCause.toString());
+        return new ExceptionInfo(req.getRequestURL(), message != null ? message : rootCause.getMessage());
+    }
+    private ExceptionInfo logAndGetExceptionInfo(HttpServletRequest req, Throwable e, boolean logException) {
+        return logAndGetExceptionInfo(req, e, logException, null);
     }
 }

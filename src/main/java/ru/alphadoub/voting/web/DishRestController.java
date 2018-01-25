@@ -50,6 +50,7 @@ public class DishRestController {
         return ResponseEntity.created(uriOfNewResource).body(created);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Dish get(@PathVariable("restaurant_id") int restaurantId, @PathVariable("id") int id) {
         log.info("get dish with id={} from restaurant with id={}", id, restaurantId);
@@ -75,8 +76,8 @@ public class DishRestController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Dish> getCurrentDayList(@PathVariable("restaurant_id") int restaurantId) {
+    public List<Dish> getTodayRestaurantMenu(@PathVariable("restaurant_id") int restaurantId) {
         log.info("get current day list of dishes from restaurant with id={}", restaurantId);
-        return service.getCurrentDayList(restaurantId);
+        return service.getTodayRestaurantMenu(restaurantId);
     }
 }

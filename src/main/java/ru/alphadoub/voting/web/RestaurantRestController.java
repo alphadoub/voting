@@ -8,18 +8,25 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ru.alphadoub.voting.AuthorizedUser;
 import ru.alphadoub.voting.ValidationGroups;
 import ru.alphadoub.voting.model.Restaurant;
+import ru.alphadoub.voting.model.Vote;
+import ru.alphadoub.voting.repository.VoteRepository;
+import ru.alphadoub.voting.service.DishService;
 import ru.alphadoub.voting.service.RestaurantService;
+import ru.alphadoub.voting.to.RestaurantWithMenu;
 import ru.alphadoub.voting.to.RestaurantWithVotes;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
+import static ru.alphadoub.voting.util.RestaurantUtil.*;
 import static ru.alphadoub.voting.util.ValidationUtil.*;
 
 @RestController
@@ -29,11 +36,17 @@ public class RestaurantRestController {
 
     static final String URL = "/restaurants";
 
-    private final RestaurantService service;
+    private final RestaurantService restaurantService;
+
+    private final DishService dishService;
+
+    private final VoteRepository voteRepository;
 
     @Autowired
-    public RestaurantRestController(RestaurantService service) {
-        this.service = service;
+    public RestaurantRestController(RestaurantService restaurantService, DishService dishService, VoteRepository voteRepository) {
+        this.restaurantService = restaurantService;
+        this.dishService = dishService;
+        this.voteRepository = voteRepository;
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -42,7 +55,7 @@ public class RestaurantRestController {
     public ResponseEntity<Restaurant> create(@Validated(ValidationGroups.Rest.class) @RequestBody Restaurant restaurant) {
         log.info("create {}", restaurant);
         checkIsNew(restaurant);
-        Restaurant created = service.create(restaurant);
+        Restaurant created = restaurantService.create(restaurant);
         URI uriOfNewResource = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path(URL + "/{id}")
                 .buildAndExpand(created.getId()).toUri();
@@ -50,10 +63,11 @@ public class RestaurantRestController {
         return ResponseEntity.created(uriOfNewResource).body(created);
     }
 
+    @Transactional
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Restaurant get(@PathVariable("id") int id) {
+    public RestaurantWithMenu get(@PathVariable("id") int id) {
         log.info("get restaurant with id={}", id);
-        return service.get(id);
+        return createWithMenu(restaurantService.get(id), dishService.getTodayRestaurantMenu(id));
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -61,7 +75,7 @@ public class RestaurantRestController {
     public void update(@Validated(ValidationGroups.Rest.class) @RequestBody Restaurant restaurant, @PathVariable("id") int id) {
         log.info("update {} with id={}", restaurant, id);
         assureIdConsistent(restaurant, id);
-        service.update(restaurant);
+        restaurantService.update(restaurant);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -69,31 +83,40 @@ public class RestaurantRestController {
     @DeleteMapping(value = "/{id}")
     public void delete(@PathVariable("id") int id) {
         log.info("delete restaurant with id={}", id);
-        service.delete(id);
+        restaurantService.delete(id);
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Restaurant> getAll() {
         log.info("get all restaurants");
-        return service.getAll();
+        return restaurantService.getAll();
+    }
+    
+    @Transactional
+    @GetMapping(value = "/with_menu", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<RestaurantWithMenu> getAllWithMenu() {
+        log.info("get all restaurants with menu");
+        return getWithMenu(restaurantService.getAll(), dishService.getAllByDate(LocalDate.now()));
     }
 
-    @PostMapping(value = "/{id}/vote")
-    public void vote(@PathVariable("id") int id, @AuthenticationPrincipal AuthorizedUser authorizedUser) {
+    @PostMapping(value = "/{id}/vote", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Vote vote(@PathVariable("id") int id, @AuthenticationPrincipal AuthorizedUser authorizedUser) {
         log.info("vote for restaurant with id={}", id);
         checkVotingTime(11);
-        service.vote(id, authorizedUser.getUser());
+        return restaurantService.vote(id, authorizedUser.getUser());
     }
 
+    @Transactional
     @GetMapping(value = "/{id}/with_votes", produces = MediaType.APPLICATION_JSON_VALUE)
     public RestaurantWithVotes getWithCurrentDayVotes(@PathVariable("id") int id) {
         log.info("get restaurant {} with current day votes", id);
-        return service.getWithCurrentDayVotes(id);
+        return createWithVotes(restaurantService.get(id), voteRepository.countByRestaurantIdAndDate(id, LocalDate.now()));
     }
 
+    @Transactional
     @GetMapping(value = "/with_votes", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<RestaurantWithVotes> getAllWithCurrentDayVotes() {
         log.info("get all restaurants with current day votes");
-        return service.getAllWithCurrentDayVotes();
+        return getWithVotes(restaurantService.getAll(), voteRepository.getAllByDate(LocalDate.now()));
     }
 }
