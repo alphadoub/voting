@@ -1,9 +1,9 @@
 package ru.alphadoub.voting.util;
 
-import org.springframework.util.Assert;
 import ru.alphadoub.voting.HasId;
 import ru.alphadoub.voting.model.BaseEntity;
 import ru.alphadoub.voting.model.Dish;
+import ru.alphadoub.voting.util.exception.IncomingDataException;
 import ru.alphadoub.voting.util.exception.NotFoundException;
 import ru.alphadoub.voting.util.exception.VotingTimeConstraintException;
 
@@ -36,10 +36,10 @@ public class ValidationUtil {
 
     public static void checkWrongDateForCreate(Dish dish) {
         if (now().compareTo(of(11, 0)) < 0) {
-            Assert.isTrue(dish.getDate().compareTo(LocalDate.now()) >= 0, String.format(OLD_DATE, dish, LocalDate.now()));
+            if (dish.getDate().compareTo(LocalDate.now()) < 0) throw new IncomingDataException(String.format(OLD_DATE, dish, LocalDate.now()));
         }
         else {
-            Assert.isTrue(dish.getDate().compareTo(LocalDate.now()) > 0, String.format(OLD_DATE_AFTER_11, dish, LocalDate.now()));
+            if (dish.getDate().compareTo(LocalDate.now()) <= 0) throw new IncomingDataException(String.format(OLD_DATE_AFTER_11, dish, LocalDate.now()));
         }
     }
     
@@ -49,29 +49,29 @@ public class ValidationUtil {
         LocalDate newDate = newDish.getDate();
 
         if (oldDate.compareTo(today) < 0) {
-            Assert.isTrue(newDate.equals(oldDate), String.format(OLD_DISH, newDish, oldDate));
+            if (!newDate.equals(oldDate)) throw new IncomingDataException(String.format(OLD_DISH, newDish, oldDate));
         } else {
             if (now().compareTo(of(11, 0)) < 0) {
-                Assert.isTrue(newDate.compareTo(today) >= 0, String.format(OLD_DATE, newDish, today));
+                if (newDate.compareTo(today) < 0) throw new IncomingDataException(String.format(OLD_DATE, newDish, today));
             } else {
                 if (oldDate.equals(today)) {
-                    Assert.isTrue(newDate.equals(oldDate), String.format(OLD_DISH_AFTER_11, newDish, oldDate));
+                    if (!newDate.equals(oldDate)) throw new IncomingDataException(String.format(OLD_DISH_AFTER_11, newDish, oldDate));
                 } else {
-                    Assert.isTrue(newDate.compareTo(today) > 0, String.format(OLD_DATE_AFTER_11, newDish, today));
+                    if (newDate.compareTo(today) <= 0) throw new IncomingDataException(String.format(OLD_DATE_AFTER_11, newDish, today));
                 }
             }
         }
     }
 
     public static void checkIsNew(BaseEntity entity) {
-        Assert.isTrue(entity.getId() == null, entity + "must be new (id=null)");
+        if(entity.getId() != null) throw new IncomingDataException(entity + "must be new (id=null)");
     }
 
     public static void assureIdConsistent(HasId entity, int id) {
         if (entity.getId() == null) {
             entity.setId(id);
         } else {
-            Assert.isTrue(entity.getId() == id, entity + " must be with id=" + id);
+            if (entity.getId() != id) throw new IncomingDataException(entity + " must be with id=" + id);
         }
     }
 
@@ -82,8 +82,7 @@ public class ValidationUtil {
     }
 
     public static void checkRestaurantId(int actual, int idFromPath) {
-        Assert.isTrue(actual == idFromPath, String.format(WRONG_RESTAURANT_ID, actual, idFromPath));
-
+        if (actual != idFromPath) throw new IncomingDataException(String.format(WRONG_RESTAURANT_ID, actual, idFromPath));
     }
 
     public static Throwable getRootCause(Throwable t) {

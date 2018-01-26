@@ -20,8 +20,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.NoHandlerFoundException;
 import ru.alphadoub.voting.util.ValidationUtil;
 import ru.alphadoub.voting.util.exception.ExceptionInfo;
+import ru.alphadoub.voting.util.exception.IncomingDataException;
 import ru.alphadoub.voting.util.exception.NotFoundException;
-import ru.alphadoub.voting.util.exception.VotingTimeConstraintException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
@@ -46,13 +46,13 @@ public class ExceptionInfoHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NoHandlerFoundException.class)
     public ExceptionInfo handleNoHandler(HttpServletRequest request, NoHandlerFoundException e) {
-        return logAndGetExceptionInfo(request, e, false);
+        return logAndGetExceptionInfo(request, e, false, e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ExceptionInfo handleNoSupported(HttpServletRequest request, HttpRequestMethodNotSupportedException e) {
-        return logAndGetExceptionInfo(request, e, false);
+        return logAndGetExceptionInfo(request, e, false, e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -62,15 +62,15 @@ public class ExceptionInfoHandler {
     }
 
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    @ExceptionHandler(NotFoundException.class)
-    public ExceptionInfo handleNotFoundException(HttpServletRequest request, NotFoundException e) {
-        return logAndGetExceptionInfo(request, e, false);
+    @ExceptionHandler({NotFoundException.class, IncomingDataException.class})
+    public ExceptionInfo handleNotFoundException(HttpServletRequest request, Exception e) {
+        return logAndGetExceptionInfo(request, e, false, e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    @ExceptionHandler({AccessDeniedException.class, VotingTimeConstraintException.class})
+    @ExceptionHandler(AccessDeniedException.class)
     public ExceptionInfo handleForbidden(HttpServletRequest request, Exception e) {
-        return logAndGetExceptionInfo(request, e, false);
+        return logAndGetExceptionInfo(request, e, false, e.getMessage());
     }
 
     @ResponseStatus(value = HttpStatus.CONFLICT)
@@ -121,7 +121,7 @@ public class ExceptionInfoHandler {
             log.warn("{} at request  {}: {}", e, req.getRequestURL(), rootCause.toString());
         }
 
-        return new ExceptionInfo(req.getRequestURL(), message != null ? message : rootCause.getMessage());
+        return new ExceptionInfo(req.getRequestURL(), message != null ? message : rootCause.toString());
     }
     private ExceptionInfo logAndGetExceptionInfo(HttpServletRequest req, Throwable e, boolean logException) {
         return logAndGetExceptionInfo(req, e, logException, null);

@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import ru.alphadoub.voting.model.Dish;
+import ru.alphadoub.voting.util.exception.IncomingDataException;
 import ru.alphadoub.voting.util.exception.NotFoundException;
 
 import javax.validation.ConstraintViolationException;
@@ -79,7 +80,7 @@ public class DishServiceTest extends AbstractServiceTest {
 
     @Test
     public void testGetWrongRestaurantId() throws Exception {
-        thrown.expect(IllegalArgumentException.class);
+        thrown.expect(IncomingDataException.class);
         thrown.expectMessage(String.format(WRONG_RESTAURANT_ID, RESTAURANT1_ID, RESTAURANT3_ID));
         service.get(DISH1_ID, RESTAURANT3_ID);
     }
@@ -110,7 +111,7 @@ public class DishServiceTest extends AbstractServiceTest {
 
     @Test
     public void testUpdateWrongRestaurantId() throws Exception {
-        thrown.expect(IllegalArgumentException.class);
+        thrown.expect(IncomingDataException.class);
         thrown.expectMessage(String.format(WRONG_RESTAURANT_ID, RESTAURANT1_ID, RESTAURANT3_ID));
         Dish updated = getUpdated(DISH1);
         service.update(updated, RESTAURANT3_ID);
@@ -118,7 +119,7 @@ public class DishServiceTest extends AbstractServiceTest {
 
     @Test
     public void testUpdateDateOfOldDish() throws Exception {
-        thrown.expect(IllegalArgumentException.class);
+        thrown.expect(IncomingDataException.class);
         Dish updated = getUpdated(DISH4);
         updated.setDate(now());
         thrown.expectMessage(String.format(OLD_DISH, updated, DISH4.getDate()));
@@ -127,7 +128,7 @@ public class DishServiceTest extends AbstractServiceTest {
 
     @Test
     public void testUpdateTodayDishWithWrongDate() throws Exception {
-        thrown.expect(IllegalArgumentException.class);
+        thrown.expect(IncomingDataException.class);
         Dish updated = getUpdated(DISH1);
 
         LocalTime now = LocalTime.now();
@@ -143,7 +144,7 @@ public class DishServiceTest extends AbstractServiceTest {
 
     @Test
     public void testUpdateFutureDishWithWrongDate() throws Exception {
-        thrown.expect(IllegalArgumentException.class);
+        thrown.expect(IncomingDataException.class);
         Dish updated = getUpdated(DISH7);
 
         LocalTime now = LocalTime.now();
